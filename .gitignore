@@ -1,0 +1,139 @@
+# ==============================================================================
+# .gitignore — fhir-pipeline (Togo Health Data Standardization Pipeline)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environnements virtuels et gestionnaires de paquets
+# ------------------------------------------------------------------------------
+.venv/
+venv/
+ENV/
+env/
+
+# IMPORTANT : Le fichier de verrouillage uv.lock DOIT être versionné dans git.
+# Ne jamais ajouter uv.lock au gitignore.
+
+# ------------------------------------------------------------------------------
+# 2. Variables d'environnement et secrets locaux
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.crt
+
+# Exception : le modèle d'environnement doit être suivi
+!.env.example
+
+# ------------------------------------------------------------------------------
+# 3. Caches Python et fichiers compilés
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ------------------------------------------------------------------------------
+# 4. Outils de test, linters et couverture de code
+# ------------------------------------------------------------------------------
+.cache
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# ------------------------------------------------------------------------------
+# 5. Bases de données locales, caches analytiques et DuckDB
+# ------------------------------------------------------------------------------
+*.duckdb
+*.duckdb.wal
+*.db
+*.sqlite
+*.sqlite3
+
+# ------------------------------------------------------------------------------
+# 6. Couches de données du Lakehouse Medallion (data/)
+# ------------------------------------------------------------------------------
+# Règle d'or : les données volumineuses ou dérivées ne sont jamais versionnées.
+# Seule l'arborescence est conservée via les fichiers .gitkeep.
+
+/data/raw/*
+!/data/raw/.gitkeep
+
+/data/bronze/*
+!/data/bronze/.gitkeep
+
+/data/silver/*
+!/data/silver/.gitkeep
+
+/data/gold/fhir/*
+!/data/gold/fhir/.gitkeep
+
+/data/gold/omop/*
+!/data/gold/omop/.gitkeep
+
+/data/gold/ai/*
+!/data/gold/ai/.gitkeep
+
+/data/quarantine/*
+!/data/quarantine/.gitkeep
+
+/data/truth/*
+!/data/truth/.gitkeep
+
+/data/reference/*
+!/data/reference/.gitkeep
+# Exception : autoriser d'éventuels micro-échantillons de référence (< 1 Mo)
+!/data/reference/sample_*
+
+# ------------------------------------------------------------------------------
+# 7. Mémoire de coordination multi-agents
+# ------------------------------------------------------------------------------
+.agents/
+
+# ------------------------------------------------------------------------------
+# 8. Fichiers système et environnements de développement (IDE)
+# ------------------------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+Thumbs.db
+ehthumbs.db
+
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
