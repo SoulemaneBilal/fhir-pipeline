@@ -102,3 +102,34 @@
   - `uv run pre-commit validate-config` : Validé (code 0).
   - Intégrité des conteneurs Docker hôtes : Les conteneurs préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés intacts, en cours d'exécution continue et en parfait état de santé.
 - **Statut de l'étape** : Terminée, testée, documentée dans les registres de gouvernance et prête pour commit Git.
+
+## 2026-11-05T17:15:00Z — Étape 3 : Moteur de Génération de Vérité Terrain (Ground Truth) et Agrégats Statistiques DHIS2
+
+- **Auteurs / Rôles** : Équipe d'Ingénierie Multi-Agents (`worker_etape3`, `orchestrator_etape3` / Implementer, QA, Specialist)
+- **Étape de la Roadmap** : Étape 3 (Génération de la Vérité Terrain et Agrégats DHIS2)
+- **Objectifs visés (R1 à R5)** :
+  1. **R1** : Développer le générateur contextuel de Vérité Terrain (`src/generation/contextual_generator.py`, ADR D-04 Voie B) synthétisant des parcours cliniques togolais réalistes et déterministes couvrant les 6 tables cliniques individuelles (`patients.parquet`, `encounters.parquet`, `conditions.parquet`, `observations.parquet`, `prescriptions.parquet`, `immunizations.parquet`), avec onomastique authentique (Éwé, Mina, Kabiyè, Tem, Moba), pyramide démographique togolaise (RGPH-5, âge médian ~19.5 ans), marqueur d'âge approximatif conforme à VAL-003 (1er juillet, `approximate-year`), 4 niveaux de la pyramide sanitaire (`togo_health_geography.parquet`), et 9 pathologies prioritaires + calendrier PEV Togo (`sample_vocabularies.parquet`).
+  2. **R2** : Implémenter le module d'extraction et de génération d'agrégats statistiques DHIS2 (`src/generation/dhis2_generator.py`) produisant les séries mensuelles au format officiel `dataValueSets` (JSON et Parquet) pour les 44 districts sanitaires sur 12 périodes mensuelles pour 10 indicateurs clés, avec mécanisme de repli hors-ligne (*offline fallback*) résilient.
+  3. **R3** : Câbler les commandes CLI dans `src/cli.py` sous le groupe `generation` : `pipeline generation run` (`--count`, `--seed`, `--output-dir`) et `pipeline generation dhis2-demo` (`--api-url`, `--output-dir`, `--offline`, `--seed`) avec validation des arguments et restitution graphique par tableaux Rich.
+  4. **R4** : Garantir la conformité aux schémas stricts PyArrow et modèles Pydantic v2, le déterminisme strict bit-à-bit (SHA-256 identiques sur graines identiques), et l'intégrité clinique (absence absolue de grossesses masculines, pas de vaccins PEV pédiatriques chez l'adulte).
+  5. **R5** : Enregistrer l'arbitrage pour VAL-003 dans `docs/journal/A_VALIDER.md`, consigner la présente entrée dans `docs/journal/JOURNAL.md`, et préserver intégralement les conteneurs Docker hôtes préexistants.
+- **Fichiers créés ou modifiés** :
+  - Création de `src/generation/schemas.py` : Définition des schémas stricts PyArrow et modèles Pydantic v2 pour les 6 tables cliniques et les agrégats DHIS2.
+  - Création de `src/generation/demographics.py` : Moteur d'onomastique togolaise authentique, pyramide des âges RGPH-5, âges approximatifs VAL-003 et sélection des 44 districts.
+  - Création de `src/generation/clinical_rules.py` : Moteur de simulation clinique des 9 pathologies prioritaires, constantes vitales LOINC, ordonnances ATC, santé maternelle SMI et calendrier vaccinal PEV Togo.
+  - Création de `src/generation/contextual_generator.py` : Moteur d'orchestration de la Vérité Terrain avec fonction principale `generate_ground_truth()`.
+  - Création de `src/generation/dhis2_generator.py` : Générateur d'agrégats statistiques DHIS2 `dataValueSets` avec fonction `extract_or_generate_dhis2_aggregates()` et repli hors-ligne.
+  - Mise à jour de `src/generation/__init__.py` : Exportation publique de `generate_ground_truth` et `extract_or_generate_dhis2_aggregates`.
+  - Mise à jour de `src/cli.py` : Raccordement complet des commandes `generation run` et `generation dhis2-demo` avec reporting Rich.
+  - Mise à jour de `docs/journal/A_VALIDER.md` : Clôture et arbitrage officiel de VAL-003.
+  - Mise à jour de `docs/journal/JOURNAL.md` : Présente entrée récapitulative pour l'Étape 3.
+- **Décisions structurantes et arbitrages appliqués** :
+  - **ADR D-04 (Voie B contextuelle)** : Confirmation de la supériorité de la génération algorithmique Python par rapport à un portage lourd de Synthea. L'implémentation reflète fidèlement les spécificités togolaises (nommage coutumier des jours, pathologies endémiques, 4 niveaux de soins).
+  - **VAL-003 (Âges approximatifs)** : Arbitré et implémenté. Tout âge estimé est formalisé avec `birth_date = YYYY-07-01`, `is_estimated_birth_date = True`, `estimated_age_flag = True`, et `age_precision = "approximate-year"`.
+  - **Autonomie réseau et résilience DHIS2** : Aucun composant ne dépend de la connectivité réseau vers `play.dhis2.org/demo`. Le repli hors-ligne synthétise de manière déterministe les 5 280 valeurs d'agrégats mensuels pour les 44 districts togolais.
+  - **Déterminisme strict** : Générateur PRNG isolé (`random.Random(seed)`), identifiants RFC 4122 UUID v5, tri préalable systématique des tables avant sérialisation Parquet en compression SNAPPY garantissant une identité bit-à-bit.
+- **Résultats de validation et métriques qualité** :
+  - Déterminisme bit-à-bit : Deux exécutions consécutives avec `seed=42` produisent des fichiers Parquet ayant des sommes de contrôle SHA-256 rigoureusement identiques sur les 6 tables.
+  - `uv run ruff check .` et `uv run ruff format --check .` : 100 % conformes (0 erreur, 0 avertissement).
+  - Intégrité des conteneurs hôtes : Les 5 conteneurs hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue.
+- **Statut de l'étape** : Terminée, vérifiée et prête pour la revue d'acceptation.

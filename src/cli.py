@@ -19,6 +19,10 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from src.generation import (
+    extract_or_generate_dhis2_aggregates,
+    generate_ground_truth,
+)
 from src.terminology.geography import (
     DEFAULT_GEOGRAPHY_PARQUET_PATH,
     generate_health_geography,
@@ -1323,15 +1327,60 @@ def generation_run(
     ] = Path("data/truth"),
 ) -> None:
     """Génère les données de vérité terrain."""
+    if count <= 0:
+        console.print(
+            f"[bold red]Erreur :[/bold red] Le paramètre --count doit être strictement positif (reçu: {count})."
+        )
+        raise typer.BadParameter("Le paramètre --count doit être strictement positif.")
+
     console.print(
         f"[bold blue][GENERATION][/bold blue] Générateur contextuel Python (ADR D-04). "
-        f"Génération de {count} patients (graine={seed}) dans [cyan]{output_dir}[/cyan]."
+        f"Génération de {count} patients (graine={seed}) dans [cyan]{output_dir}[/cyan]..."
+    )
+
+    import pyarrow.parquet as pq
+
+    generated_paths = generate_ground_truth(count=count, seed=seed, output_dir=output_dir)
+
+    table = Table(
+        title=f"Vérité Terrain Générée (Cohorte N={count}, Graine={seed})",
+        border_style="green",
+    )
+    table.add_column("Entité Clinique", style="bold cyan")
+    table.add_column("Fichier Parquet", style="magenta")
+    table.add_column("Lignes", justify="right", style="green")
+    table.add_column("Colonnes", justify="right", style="yellow")
+    table.add_column("Taille (Ko)", justify="right", style="white")
+
+    total_rows = 0
+    display_keys = [
+        ("patients", "Dossiers Patients (Demographics)"),
+        ("encounters", "Séjours & Consultations (Encounters)"),
+        ("conditions", "Diagnostics Médicaux (Conditions)"),
+        ("observations", "Constantes & Examens (Observations)"),
+        ("prescriptions", "Ordonnances Médicales (Prescriptions)"),
+        ("immunizations", "Vaccinations PEV Togo (Immunizations)"),
+    ]
+
+    for key, label in display_keys:
+        p = generated_paths[key]
+        pq_tbl = pq.read_table(p)
+        nrows = pq_tbl.num_rows
+        ncols = pq_tbl.num_columns
+        size_kb = round(p.stat().st_size / 1024, 2)
+        total_rows += nrows
+        table.add_row(label, p.name, f"{nrows:,}", str(ncols), f"{size_kb} Ko")
+
+    console.print(table)
+    console.print(
+        f"[bold green]✔ Succès :[/bold green] {total_rows:,} enregistrements cliniques "
+        f"générés avec succès dans [cyan]{output_dir}[/cyan]."
     )
 
 
 @generation_app.command(
     name="dhis2-demo",
-    help="Extraire les jeux d'agrégats statistiques de démonstration depuis l'API publique DHIS2.",
+    help="Extraire ou générer les jeux d'agrégats statistiques de démonstration DHIS2 (dataValueSets).",
 )
 def generation_dhis2_demo(
     api_url: Annotated[
@@ -1341,10 +1390,71 @@ def generation_dhis2_demo(
             help="URL de base de l'instance démo publique DHIS2.",
         ),
     ] = "https://play.dhis2.org/demo",
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir",
+            help="Dossier de stockage des agrégats DHIS2.",
+        ),
+    ] = Path("data/truth/dhis2"),
+    offline: Annotated[
+        bool,
+        typer.Option(
+            "--offline",
+            help="Forcer le mode hors-ligne sans tenter la connexion à l'API distante.",
+        ),
+    ] = False,
+    seed: Annotated[
+        int,
+        typer.Option(
+            "--seed",
+            help="Graine pseudo-aléatoire déterministe.",
+        ),
+    ] = 42,
 ) -> None:
-    """Extrait les données de démo DHIS2."""
+    """Extrait ou génère les données de démo DHIS2."""
+    mode_str = "HORS-LIGNE (synthétique)" if offline else f"EN LIGNE ({api_url})"
     console.print(
-        f"[bold blue][GENERATION][/bold blue] Extraction des agrégats DHIS2 depuis : [cyan]{api_url}[/cyan]."
+        f"[bold blue][GENERATION][/bold blue] Agrégats statistiques DHIS2 dataValueSets "
+        f"Mode: [cyan]{mode_str}[/cyan]..."
+    )
+
+    import pyarrow.parquet as pq
+
+    res = extract_or_generate_dhis2_aggregates(
+        api_url=api_url,
+        output_dir=output_dir,
+        offline=offline,
+        seed=seed,
+    )
+
+    json_path = res["json"]
+    parquet_path = res["parquet"]
+
+    pq_tbl = pq.read_table(parquet_path)
+    nrows = pq_tbl.num_rows
+
+    table = Table(
+        title="Agrégats Statistiques DHIS2 Générés",
+        border_style="blue",
+    )
+    table.add_column("Type de Fichier", style="bold cyan")
+    table.add_column("Chemin Fichier", style="magenta")
+    table.add_column("Valeurs / Lignes", justify="right", style="green")
+    table.add_column("Taille (Ko)", justify="right", style="white")
+
+    json_size_kb = round(json_path.stat().st_size / 1024, 2)
+    parquet_size_kb = round(parquet_path.stat().st_size / 1024, 2)
+
+    table.add_row("DHIS2 dataValueSets (JSON)", str(json_path), f"{nrows:,}", f"{json_size_kb} Ko")
+    table.add_row(
+        "Agrégats Tabulaires (Parquet)", str(parquet_path), f"{nrows:,}", f"{parquet_size_kb} Ko"
+    )
+
+    console.print(table)
+    console.print(
+        f"[bold green]✔ Succès :[/bold green] {nrows:,} valeurs d'indicateurs agrégés "
+        f"sauvegardées dans [cyan]{output_dir}[/cyan]."
     )
 
 
