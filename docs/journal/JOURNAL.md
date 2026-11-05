@@ -133,3 +133,46 @@
   - `uv run ruff check .` et `uv run ruff format --check .` : 100 % conformes (0 erreur, 0 avertissement).
   - Intégrité des conteneurs hôtes : Les 5 conteneurs hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue.
 - **Statut de l'étape** : Terminée, vérifiée et prête pour la revue d'acceptation.
+
+
+---
+
+## 2026-11-05T20:05:00Z — Étape 4 : Moteur de Dégradation Contrôlée et Stress-Test Multi-Formats
+
+- **Auteurs / Rôles** : Équipe d'Ingénierie Multi-Agents (`orchestrator_etape4`, `test_writer_etape4`, `worker_etape4`, `reviewer_etape4`, `challenger_etape4`, `auditor_etape4` / Implementer, QA, Reviewer, Challenger, Auditor)
+- **Étape de la Roadmap** : Étape 4 (Banc de test d'altération contrôlée de données et stress-test du pipeline)
+- **Objectifs visés (R1 à R6)** :
+  1. **R1** : Établir un catalogue d'erreurs versionné déclaratif (`config/degradation_rules.yaml` et `src/degradation/catalog.py`) couvrant 16 règles canoniques (`MANDATORY_RULE_IDS`) catégorisées (dates, patronymes togolais, clinique en texte libre, mesures/unités, sentinelles, données manquantes, encodage Mojibake, structures sanitaires, doublons patients, anomalies FHIR et DHIS2).
+  2. **R2** : Développer la bibliothèque de mutateurs unitaires purs sous PRNG isolé (`src/degradation/mutators.py`) simulant les dégradations réalistes du terrain d'Afrique de l'Ouest (formats composites de dates, âges approximatifs, coquilles patronymiques, diacritiques, inversions nom/prénom, libellés médicaux non codés, séparateurs virgules, sentinelles hospitalières -1/999/NA, mojibake Latin-1/UTF-8).
+  3. **R3** : Modéliser le journal d'altérations exhaustif (`src/degradation/schemas.py`, `src/degradation/engine.py`) garantissant la traçabilité intégrale de chaque modification (`alteration_id`, `table_name`, `row_id`, `column_name`, `original_value`, `altered_value`, `rule_id`, `description`, `timestamp`) et démontrant la réversibilité absolue (*corrigé de référence* pour évaluer le rappel et la précision des étapes ultérieures de profilage et de déduplication).
+  4. **R4** : Implémenter le moteur d'orchestration global (`src/degradation/engine.py`) appliquant les mutations sur les 6 tables de Vérité Terrain, respectant strictement le taux cible (+/- 5%), injectant des doublons de patients inter-établissements (`RULE-DUPL-001`) avec identifiants distincts pour l'Étape 8 (Splink), et garantissant un déterminisme bit-à-bit parfait sous graine fixe (SHA-256 identiques).
+  5. **R5** : Implémenter les exportateurs multi-formats préparatoires pour l'Étape 5 d'ingestion (`src/degradation/exporters.py`) : classeur Excel multi-onglets (`.xlsx` via `openpyxl`), CSV propriétaire délimité par point-virgule, Bundle FHIR dégradé et agrégats DHIS2 altérés.
+  6. **R6** : Câbler les commandes CLI Typer sous le groupe `degradation` (`pipeline degradation list-rules` et `pipeline degradation apply`) avec validation des arguments, aides en français et restitution graphique soignée via Rich.
+- **Fichiers créés ou modifiés** :
+  - Création de `config/degradation_rules.yaml` : Catalogue déclaratif des 16 règles d'altération versionné 1.0.0.
+  - Création de `src/degradation/schemas.py` : Modèles Pydantic v2 et schémas PyArrow stricts pour la configuration et le journal d'altérations.
+  - Création de `src/degradation/catalog.py` : Gestionnaire de catalogue `DegradationCatalog` et fonctions de chargement.
+  - Création de `src/degradation/mutators.py` : 12 fonctions mutatrices unitaires pures et déterministes.
+  - Création de `src/degradation/engine.py` : Moteur de dégradation `DegradationEngine` et fonction publique `apply_degradation`.
+  - Création de `src/degradation/exporters.py` : Exportateurs multi-formats (Excel, CSV, FHIR, DHIS2).
+  - Mise à jour de `src/degradation/__init__.py` : Exportation publique propre de l'API de dégradation.
+  - Mise à jour de `src/cli.py` : Câblage complet des commandes `degradation apply` et `degradation list-rules`.
+  - Création de `tests/test_degradation.py` : Suite de tests E2E Tiers 1 à 5 (1 150+ lignes, 38 tests).
+  - Création de `tests/test_cli_degradation.py` : Suite de tests CLI Typer (8 tests).
+  - Mise à jour de `TEST_INFRA.md` et `TEST_READY.md` : Documentation et cartographie complète des tests d'Étape 4.
+  - Mise à jour de `.gitignore` : Sanctuarisation de `data/degraded/*` avec conservation de `.gitkeep`.
+  - Mise à jour de `docs/journal/JOURNAL.md` : Présente entrée récapitulative pour l'Étape 4.
+- **Décisions structurantes et arbitrages appliqués** :
+  - **Catalogue d'altérations déclaratif (Version 1.0.0)** : Centralisation des règles dans un fichier YAML pour permettre une auditabilité totale et l'ajustement sans recompilation des taux et sélecteurs de colonnes.
+  - **Traçabilité inviolable (Principes #2 et #5 de AGENT.md)** : Toute mutation est consignée dans un journal binaire `alterations_log.parquet` (et `alterations_log.jsonl`) servant de corrigé de référence infalsifiable.
+  - **Réversibilité intégrale démontrée** : Test empirique formel confirmant que l'application inverse des enregistrements du journal sur les données dégradées reconstitue 100% de la Vérité Terrain d'origine.
+  - **Déterminisme binaire bit-à-bit** : Utilisation stricte de générateurs PRNG isolés (`random.Random(seed)`), génération d'identifiants déterministes RFC 4122 UUID v5, et tri préalable systématique avant sérialisation Parquet avec compression SNAPPY.
+  - **Préparation du banc de test Splink (Étape 8)** : Injection sous `RULE-DUPL-001` de répliques patient distribuées dans des établissements sanitaires différents avec identifiants distincts et légères variantes orthographiques.
+- **Résultats de validation et métriques qualité** :
+  - `STRICT_E2E=1 uv run pytest tests/test_degradation.py tests/test_cli_degradation.py` : 100 % de réussite (46 tests réussis sur 46, 0 échec, 0 sauté en 4.08s).
+  - Régression globale `uv run pytest` : 100 % de réussite (234 tests réussis sur 234 en 17.5s, 0 régression sur les étapes antérieures).
+  - `uv run ruff check .` et `uv run ruff format --check .` : 100 % conformes (0 faute, 0 avertissement).
+  - Déterminisme bit-à-bit : Deux exécutions CLI indépendantes avec `--seed 42` et `--rate 0.15` produisent des sommes de contrôle SHA-256 rigoureusement identiques sur les 7 tables Parquet et le journal JSONL.
+  - Adhérence stricte aux taux cibles : Mesures empiriques à 5.00%, 15.00% et 30.00% avec un écart exact de 0.00% sur les patients altérés (largement dans la tolérance de +/- 5%).
+  - Sanctuarisation Docker : Les 5 conteneurs Docker hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue et en parfait état de santé (`healthy`).
+- **Statut de l'étape** : Terminée, auditée avec avis unanimes APPROVE / CLEAN par les trois pairs indépendants, et validée par commit Git.

@@ -19,6 +19,10 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from src.degradation import (
+    apply_degradation,
+    load_rules_catalog,
+)
 from src.generation import (
     extract_or_generate_dhis2_aggregates,
     generate_ground_truth,
@@ -1254,6 +1258,13 @@ def degradation_apply(
             help="Graine pseudo-aléatoire fixe pour garantir la reproductibilité absolue.",
         ),
     ] = 42,
+    source_dir: Annotated[
+        Path,
+        typer.Option(
+            "--source-dir",
+            help="Dossier source contenant les tables de Vérité Terrain Parquet.",
+        ),
+    ] = Path("data/truth"),
     output_dir: Annotated[
         Path,
         typer.Option(
@@ -1263,9 +1274,50 @@ def degradation_apply(
     ] = Path("data/degraded"),
 ) -> None:
     """Applique le banc de dégradation contrôlée."""
+    if not (0.0 <= rate <= 1.0):
+        console.print(
+            f"[bold red]Erreur:[/bold red] Le taux d'altération (--rate) doit être compris entre 0.0 et 1.0 (reçu: {rate})."
+        )
+        raise typer.BadParameter(
+            f"Le taux d'altération (rate) doit être compris entre 0.0 et 1.0, reçu: {rate}"
+        )
+
+    if not source_dir.exists():
+        console.print(
+            f"[bold red]Erreur:[/bold red] Le dossier source spécifié n'existe pas : [cyan]{source_dir}[/cyan]"
+        )
+        raise typer.BadParameter(f"Le dossier source spécifié n'existe pas : {source_dir}")
+
     console.print(
-        f"[bold blue][DEGRADATION][/bold blue] Injection d'anomalies réalistes. "
-        f"Taux={rate * 100:.1f}%, graine={seed}, destination : [cyan]{output_dir}[/cyan]. Journal d'altérations produit."
+        Panel.fit(
+            f"[bold blue]Banc de Dégradation Contrôlée (Étape 4)[/bold blue]\n"
+            f"Source : [cyan]{source_dir}[/cyan]\n"
+            f"Destination : [cyan]{output_dir}[/cyan]\n"
+            f"Taux d'altération cible : [magenta]{rate * 100:.1f}%[/magenta]\n"
+            f"Graine pseudo-aléatoire : [yellow]{seed}[/yellow]",
+            title="[bold green]Configuration de Dégradation[/bold green]",
+        )
+    )
+
+    result = apply_degradation(
+        source_dir=source_dir,
+        output_dir=output_dir,
+        rate=rate,
+        seed=seed,
+    )
+
+    table = Table(title="Tables Cliniques Dégradées Produites")
+    table.add_column("Table", style="cyan", justify="left")
+    table.add_column("Lignes", style="green", justify="right")
+    table.add_column("Fichier Parquet", style="blue")
+
+    for t_name, df in result["tables"].items():
+        table.add_row(t_name, str(len(df)), str(output_dir / f"{t_name}.parquet"))
+
+    console.print(table)
+    console.print(
+        f"[bold green]Succès :[/bold green] [magenta]{result['alterations_count']}[/magenta] altérations tracées dans "
+        f"[cyan]{output_dir / 'alterations_log.parquet'}[/cyan]."
     )
 
 
@@ -1283,9 +1335,44 @@ def degradation_list_rules(
     ] = False,
 ) -> None:
     """Liste les règles de dégradation disponibles."""
-    console.print(
-        f"[bold blue][DEGRADATION][/bold blue] Catalogue des règles d'altération disponibles (détaillé={detailed})."
+    catalog = load_rules_catalog()
+    table = Table(
+        title="Catalogue des règles d'altération et d'injection d'erreurs (Étape 4)",
+        show_header=True,
+        header_style="bold magenta",
     )
+    table.add_column("ID Règle", style="bold cyan")
+    table.add_column("Nom", style="green")
+    table.add_column("Catégorie", style="yellow")
+    table.add_column("Taux défaut", style="magenta", justify="right")
+    table.add_column("Description", style="white")
+
+    if detailed:
+        table.add_column("Tables cibles", style="blue")
+        table.add_column("Colonnes cibles", style="dim")
+
+    for rule in catalog.rules:
+        rate_str = f"{rule.default_rate * 100:.0f}%"
+        if detailed:
+            table.add_row(
+                rule.rule_id,
+                rule.name,
+                rule.category,
+                rate_str,
+                rule.description,
+                ", ".join(rule.target_tables),
+                ", ".join(rule.target_columns) if rule.target_columns else "(toutes)",
+            )
+        else:
+            table.add_row(
+                rule.rule_id,
+                rule.name,
+                rule.category,
+                rate_str,
+                rule.description,
+            )
+
+    console.print(table)
 
 
 # ==============================================================================

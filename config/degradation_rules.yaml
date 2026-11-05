@@ -1,0 +1,167 @@
+version: "1.0.0"
+default_rate: 0.15
+default_seed: 42
+
+rules:
+  - rule_id: "RULE-DATE-001"
+    name: "Formats de dates hétérogènes"
+    category: "date"
+    description: "Conversion des dates ISO 8601 standard en formats composites disparates (JJ/MM/AAAA, JJ-MM-AAAA, AAAA/MM/JJ, JJ.MM.AA)."
+    target_tables: ["patients", "encounters", "conditions", "observations", "prescriptions", "immunizations"]
+    target_columns: ["birth_date", "start_date", "end_date", "onset_date", "prescribed_date", "occurrence_date"]
+    default_rate: 0.15
+    parameters:
+      formats: ["%d/%m/%Y", "%d-%m-%Y", "%Y/%m/%d", "%d.%m.%y", "%d%m%Y"]
+
+  - rule_id: "RULE-DATE-002"
+    name: "Âge approximatif textuel"
+    category: "date"
+    description: "Remplacement de la date de naissance exacte par une approximation textuelle usuelle (ex. environ 35 ans, ~22 ans, vers 40 ans)."
+    target_tables: ["patients"]
+    target_columns: ["birth_date"]
+    default_rate: 0.10
+    parameters:
+      prefixes: ["environ", "env.", "~", "vers", "né vers"]
+
+  - rule_id: "RULE-NAME-001"
+    name: "Coquilles patronymiques togolaises"
+    category: "name"
+    description: "Altération typographique réaliste et coquilles fréquentes sur les patronymes togolais (ex. Mensah vers Mensa, Lawson vers Lauson)."
+    target_tables: ["patients"]
+    target_columns: ["family_name", "given_name"]
+    default_rate: 0.15
+    parameters:
+      variations:
+        Mensah: "Mensa"
+        Lawson: "Lauson"
+        Adjamagbo: "Adjamagba"
+        Ametowobla: "Ametowoba"
+        Tchagbele: "Tchagbélé"
+        Koffi: "Kofi"
+        Kodjo: "Kojo"
+        Ablavi: "Abla"
+
+  - rule_id: "RULE-NAME-002"
+    name: "Suppression des diacritiques et accents"
+    category: "name"
+    description: "Suppression des accents et caractères diacritiques français fréquemment perdus lors des saisies locales (ex. Émile vers Emile)."
+    target_tables: ["patients", "encounters", "conditions", "observations"]
+    target_columns: ["family_name", "given_name", "address_city", "facility_name", "reason_display", "loinc_display"]
+    default_rate: 0.20
+    parameters: {}
+
+  - rule_id: "RULE-NAME-003"
+    name: "Inversion nom et prénom"
+    category: "name"
+    description: "Permutation involontaire entre le nom de famille et le prénom dans les formulaires d'admission hospitalière."
+    target_tables: ["patients"]
+    target_columns: ["family_name", "given_name"]
+    default_rate: 0.10
+    parameters: {}
+
+  - rule_id: "RULE-NAME-004"
+    name: "Variantes phonétiques et translittérations locales"
+    category: "name"
+    description: "Translittération phonétique locale des noms en langues nationales togolaises (Mina, Éwé, Kabyè, Kotokoli)."
+    target_tables: ["patients"]
+    target_columns: ["family_name", "given_name"]
+    default_rate: 0.10
+    parameters: {}
+
+  - rule_id: "RULE-CLIN-001"
+    name: "Libellés cliniques en texte libre et abréviations"
+    category: "clinical"
+    description: "Remplacement de diagnostics médicaux codés par des abréviations familières ou du texte libre (ex. palu simple, HTA, GEA, IRA)."
+    target_tables: ["encounters", "conditions"]
+    target_columns: ["reason_display", "icd10_display", "snomed_display"]
+    default_rate: 0.20
+    parameters:
+      abbreviations:
+        "Paludisme": "palu simple"
+        "Hypertension": "HTA stade 1"
+        "Gastro-entérite": "GEA fébrile"
+        "Infection respiratoire": "IRA haute"
+
+  - rule_id: "RULE-MEAS-001"
+    name: "Séparateur décimal virgule francophone"
+    category: "measurement"
+    description: "Remplacement du point décimal anglophone standard par la virgule francophone usuelle sur les mesures physiologiques et de laboratoire."
+    target_tables: ["observations"]
+    target_columns: ["value_quantity", "value_numeric", "value_string"]
+    default_rate: 0.25
+    parameters:
+      separator: ","
+
+  - rule_id: "RULE-MEAS-002"
+    name: "Unités de mesure non conformes ou omises"
+    category: "measurement"
+    description: "Substitution ou omission d'unités de mesure internationales UCUM par des notations locales (ex. g/l au lieu de g/dL, °C au lieu de Cel)."
+    target_tables: ["observations"]
+    target_columns: ["value_unit", "unit"]
+    default_rate: 0.15
+    parameters: {}
+
+  - rule_id: "RULE-SENT-001"
+    name: "Codes sentinelles d'indétermination"
+    category: "missing"
+    description: "Remplacement d'attributs absents par des codes sentinelles numériques ou textuels (-1, 999, -999, NA, ND, N/A, INCONNU)."
+    target_tables: ["patients", "encounters", "observations", "prescriptions"]
+    target_columns: ["phone_number", "address_city", "value_numeric", "quantity", "duration_days"]
+    default_rate: 0.10
+    parameters:
+      sentinels: ["-1", "999", "-999", "9999", "NA", "ND", "N/A", "INCONNU"]
+
+  - rule_id: "RULE-MISS-001"
+    name: "Valeurs manquantes et chaînes vides"
+    category: "missing"
+    description: "Suppression totale de données par omission de saisie ou perte lors des transmissions réseau (valeur nulle ou chaîne vide)."
+    target_tables: ["patients", "encounters", "conditions", "observations", "prescriptions", "immunizations"]
+    target_columns: ["phone_number", "referral_from_facility_id", "severity", "interpretation", "dosage_instruction", "lot_number"]
+    default_rate: 0.10
+    parameters: {}
+
+  - rule_id: "RULE-DUPL-001"
+    name: "Doublons de patients inter-établissements"
+    category: "identity"
+    description: "Génération de doublons de patients avec identifiants distincts et légères variations typographiques pour le banc Splink (Étape 8)."
+    target_tables: ["patients"]
+    target_columns: ["patient_id", "identifier_value", "family_name", "given_name", "birth_date"]
+    default_rate: 0.05
+    parameters:
+      duplicate_ratio: 0.05
+
+  - rule_id: "RULE-ENCO-001"
+    name: "Corruption d'encodage Mojibake"
+    category: "encoding"
+    description: "Simulation d'altérations d'encodage Mojibake provoquées par la lecture en Latin-1 / Windows-1252 de chaînes encodées en UTF-8."
+    target_tables: ["patients", "encounters", "conditions", "observations"]
+    target_columns: ["family_name", "given_name", "address_city", "facility_name", "reason_display"]
+    default_rate: 0.10
+    parameters: {}
+
+  - rule_id: "RULE-FACI-001"
+    name: "Variantes et abréviations des formations sanitaires"
+    category: "facility"
+    description: "Usage de sigles hospitaliers et dénominations informelles pour les structures sanitaires togolaises (CMS, USP, CHU SO, etc.)."
+    target_tables: ["encounters", "immunizations"]
+    target_columns: ["facility_name"]
+    default_rate: 0.20
+    parameters: {}
+
+  - rule_id: "RULE-FHIR-001"
+    name: "Anomalies structurelles et références FHIR orphelines"
+    category: "interoperability"
+    description: "Injection d'incohérences de schéma FHIR R4 : références de ressources cassées, codes terminologiques non résolus, dates invalides."
+    target_tables: ["patients", "encounters", "conditions", "observations", "prescriptions", "immunizations"]
+    target_columns: ["patient_id", "encounter_id", "loinc_code", "icd10_code"]
+    default_rate: 0.05
+    parameters: {}
+
+  - rule_id: "RULE-DHIS-001"
+    name: "Altérations des agrégats statistiques DHIS2"
+    category: "dhis2"
+    description: "Corruption d'agrégats statistiques sanitaires DHIS2 : périodes manquantes, reports de valeurs négatives ou discordances de ventilation."
+    target_tables: ["dhis2"]
+    target_columns: ["value", "period", "data_element"]
+    default_rate: 0.10
+    parameters: {}

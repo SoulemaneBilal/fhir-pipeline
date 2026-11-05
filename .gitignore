@@ -110,6 +110,9 @@ coverage.xml
 /data/truth/*
 !/data/truth/.gitkeep
 
+/data/degraded/*
+!/data/degraded/.gitkeep
+
 /data/reference/*
 !/data/reference/.gitkeep
 # Exception : autoriser d'éventuels micro-échantillons de référence (< 1 Mo)
