@@ -1,4 +1,4 @@
-# Test Infrastructure Specification — Étape 5 (Ingestion Raw, Bronze & Quarantaine)
+# Test Infrastructure Specification — Étape 6 (Profilage Qualité Initial & Rapport Avant)
 
 ## 1. Test Philosophy
 
@@ -10,11 +10,14 @@ The test infrastructure for the Togo Health Data Pipeline (`fhir-pipeline`) adhe
 2. **Offline-First & Zero Network Dependencies**:
    Conforming to `AGENT.md` (§ 2.4, l. 121-125), all tests execute in complete network isolation. Outbound network requests to external terminology servers, live DHIS2 instances (`play.dhis2.org/demo`), or package repositories are forbidden during test runs.
 
-3. **Strict Mathematical Determinism (Bit-for-Bit Parquet)**:
-   Conforming to `AGENT.md` (l. 25-44) and ADR D-04, all generation, degradation, and ingestion processes must be strictly reproducible. Two consecutive runs with the same inputs must produce bit-for-bit identical Apache Parquet files and alteration/ingestion manifests (matching SHA-256 cryptographic checksums).
+3. **Strict Mathematical Determinism (Bit-for-Bit Parquet & Reports)**:
+   Conforming to `AGENT.md` (l. 25-44) and ADR D-04, all profiling evaluations and report calculations must be strictly reproducible. Repeated executions on the same Bronze dataset produce identical metrics, dimension scores, and report outputs.
 
 4. **100% Real-World Reference Adherence & Traceability**:
-   Every record ingested into the Bronze layer must retain the 4 mandatory audit metadata fields (`source_file`, `source_row`, `ingested_at`, `content_hash`), establishing an unbreakable chain of custody from raw source to analytics.
+   Profilers strictly evaluate clinical data against frozen authoritative tables:
+   - Codes verified against `terminology/sample_vocabularies.parquet` (CIM-10, LOINC, ATC, SNOMED).
+   - Facilities and administrative boundaries verified against `data/reference/togo_health_geography.parquet`.
+   - Audit columns (`source_file`, `source_row`, `ingested_at`, `content_hash`) are strictly excluded from business data quality calculations (AGENT.md #2).
 
 5. **Host Environment Protection**:
    Tests must never alter, restart, or terminate pre-existing Docker containers running on the host system (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`).
@@ -24,49 +27,46 @@ The test infrastructure for the Togo Health Data Pipeline (`fhir-pipeline`) adhe
 
 ---
 
-## 2. Feature Inventory & Traceability Matrix (Étape 5)
+## 2. Feature Inventory & Traceability Matrix (Étape 6)
 
 | Feature ID | Requirement | Domain / Target | Authoritative Source | Test Suite File | Test Tiers |
 |---|---|---|---|---|---|
-| **FEAT-ING-01** | R1, AGENT.md #1 | Bit-for-Bit Raw Ingestion & SHA-256 | `technique.md:68` | `tests/test_ingestion.py` | Tier 3 |
-| **FEAT-ING-02** | R2 | Multi-Format Reader: Multi-Sheet Excel | `technique.md:68` | `tests/test_ingestion.py` | Tier 2 |
-| **FEAT-ING-03** | R2 | Multi-Format Reader: Auto-Detect CSV (Delim/Enc) | `technique.md:68` | `tests/test_ingestion.py` | Tier 2 |
-| **FEAT-ING-04** | R2 | Multi-Format Reader: FHIR R4 JSON Bundles | `technique.md:68` | `tests/test_ingestion.py` | Tier 2 |
-| **FEAT-ING-05** | R2 | Multi-Format Reader: DHIS2 dataValueSets | `technique.md:68` | `tests/test_ingestion.py` | Tier 2 |
-| **FEAT-ING-06** | R3, AGENT.md #2 | 4 Mandatory Audit Columns in Bronze | `AGENT.md:29-30` | `tests/test_ingestion.py` | Tier 4 |
-| **FEAT-ING-07** | R3 | Row Count Equality (Bronze == Source Valid) | `technique.md:69` | `tests/test_ingestion.py` | Tier 4 |
-| **FEAT-ING-08** | R4, AGENT.md #6 | Non-Blocking Quarantine for Corrupt Files | `technique.md:68-69` | `tests/test_ingestion.py` | Tier 5 |
-| **FEAT-ING-09** | R5 | Ingestion Idempotence & Determinism | `technique.md:69` | `tests/test_ingestion.py` | Tier 3 & 4 |
-| **FEAT-ING-10** | R6 | End-to-End Ingestion Pipeline & Dry-Run | `SCOPE.md:47` | `tests/test_ingestion.py` | Tier 6 |
-| **FEAT-ING-11** | R7 | CLI Commands (`raw ingest`, `raw status`) | `src/cli.py:67` | `tests/test_cli_ingestion.py` | CLI Tests |
-| **FEAT-ING-12** | R7 | CLI Commands (`bronze convert`, `validate`) | `src/cli.py:126` | `tests/test_cli_ingestion.py` | CLI Tests |
+| **FEAT-PRF-01** | R1, ISO 25012 | 6 Normative Quality Dimensions (Schemas & Models) | `technique.md:73` | `tests/test_profiling.py` | Tier 1 |
+| **FEAT-PRF-02** | R1 | Evaluator: Completeness (Nulls, Sentinels, Empty) | `technique.md:73` | `tests/test_profiling.py` | Tier 2 |
+| **FEAT-PRF-03** | R1 | Evaluator: Accuracy (Non-ISO Dates, Approx Ages, Mojibake) | `technique.md:73` | `tests/test_profiling.py` | Tier 2 |
+| **FEAT-PRF-04** | R1 | Evaluator: Consistency (Male Pregnancy, Temporal Order) | `technique.md:73` | `tests/test_profiling.py` | Tier 2 |
+| **FEAT-PRF-05** | R1 | Evaluator: Uniqueness (Primary Keys, Splink Quasi-Duplicates) | `technique.md:73` | `tests/test_profiling.py` | Tier 2 |
+| **FEAT-PRF-06** | R1 | Evaluator: Validity (CIM-10, LOINC, ATC, Geography, UCUM) | `technique.md:73` | `tests/test_profiling.py` | Tier 2 |
+| **FEAT-PRF-07** | R1 | Evaluator: Timeliness (Future Dates, Dates < 1900) | `technique.md:73` | `tests/test_profiling.py` | Tier 2 |
+| **FEAT-PRF-08** | R2 | Global Engine: QualityProfiler (Table & Dataset) | `SCOPE.md:35` | `tests/test_profiling.py` | Tier 3 |
+| **FEAT-PRF-09** | R3 | Confrontation with Alterations Log (Recall >= 80%) | `technique.md:74` | `tests/test_profiling.py` | Tier 4 |
+| **FEAT-PRF-10** | R4 | Baseline Quality Report Generation (Markdown & JSON) | `technique.md:73` | `tests/test_profiling.py` | Tier 5 |
+| **FEAT-PRF-11** | R5 | CLI Commands (`bronze profile`, Rich UI) | `src/cli.py:307` | `tests/test_cli_profiling.py` | CLI Tests |
 
 ---
 
-## 3. Test Tier Architecture (Étape 5)
+## 3. Test Tier Architecture (Étape 6)
 
 ### Tier 1: Schemas & Data Contracts
-- **Objective**: Validate Pydantic v2 models and PyArrow schemas (`SourceFormat`, `RawFileRecord`, `RawManifest`, `QuarantineRecord`, `AUDIT_COLUMNS`, `BRONZE_AUDIT_SCHEMA`, `IngestionResult`).
+- **Objective**: Validate Pydantic v2 models and StrEnum for quality dimensions (`QualityDimension`, `ColumnMetric`, `DimensionScore`, `TableQualitySummary`, `RecallMetric`, `ProfilingReport`).
 
-### Tier 2: Multi-Format Source Readers
-- **Objective**: Validate format-specific readers:
-  - Excel (`read_excel_source`): multi-sheet `.xlsx` / `.xls` extraction with sheet filtering.
-  - CSV (`read_csv_source`): auto-detection of delimiters (`,`, `;`, `\t`, `|`) and encodings (`utf-8`, `latin-1`, `cp1252`) preserving Togolese diacritics.
-  - FHIR (`read_fhir_source`): JSON Bundle parsing into typed DataFrames by `resourceType`.
-  - DHIS2 (`read_dhis2_source`): `dataValueSets` JSON/Parquet parsing into normalized tabular formats.
-  - Sniffer (`detect_source_type`): automatic format detection from filename and content inspection.
+### Tier 2: 6 Dimension Evaluators
+- **Objective**: Validate isolated dimension evaluators:
+  - Completeness: detection of nulls, empty strings, and hospital sentinel codes (`-1`, `999`, `NA`, `ND`, `INCONNU`).
+  - Accuracy: detection of composite date formats, textual approximate ages, UTF-8 Mojibake, and French comma decimal separators.
+  - Consistency: detection of male pregnancies (codes Z34/Z35/O in males), temporal inversions, and health pyramid discrepancies.
+  - Uniqueness: detection of primary key collisions and multi-facility suspected patient duplicates.
+  - Validity: validation against reference terminologies, geographic boundaries, and UCUM units.
+  - Timeliness: detection of future event dates and historical anomalies (< 1900).
 
-### Tier 3: Raw Layer & Cryptographic Manifest
-- **Objective**: Validate immutable bit-for-bit file copy to `data/raw/`, 64KB block SHA-256 calculation, `raw_manifest.json` generation, idempotence, and byte-level corruption detection (`verify_raw_integrity`).
+### Tier 3: Global Quality Profiler Engine
+- **Objective**: Validate dataset-wide profiling orchestration across all Bronze tables (`patients`, `encounters`, `conditions`, `observations`, `prescriptions`, `immunizations`, `dhis2_data_values`). Asserts deterministic scoring, empty-table resilience, and audit-column exclusion.
 
-### Tier 4: Bronze Layer Parquet Conversion
-- **Objective**: Validate conversion to Apache Parquet SNAPPY with the 4 mandatory audit columns (`source_file`, `source_row` 1-based, `ingested_at`, `content_hash`). Enforces strict row count equality (`len(bronze) == len(source_valid)`).
+### Tier 4: Ground Truth Answer Key Confrontation & Recall
+- **Objective**: Validate detection recall ($TP / (TP + FN)$) against `data/degraded/alterations_log.parquet`. Enforces global recall threshold $\ge 80.0\%$ (empirically measured at **99.9%**).
 
-### Tier 5: Resilient Quarantine & Golden Non-Blocking Rule
-- **Objective**: Validate automatic isolation of corrupted files (truncated binaries, broken JSON syntax) into `data/quarantine/` with codified incident metadata JSON (`quarantine_reason`, `error_type`, `error_details`). Asserts that quarantined files NEVER halt batch processing and valid files are 100% converted to Bronze.
-
-### Tier 6: End-to-End Ingestion Engine
-- **Objective**: Validate `IngestionEngine` and `run_ingestion_pipeline`, including `--dry-run` simulation without disk side-effects.
+### Tier 5: Baseline Quality Report Generation
+- **Objective**: Validate automated generation of `profiling_bronze.md` and `profiling_bronze.json`, with executive summary, 6D score matrix, table breakdown, and actionable silver cleaning recommendations.
 
 ---
 
@@ -81,19 +81,20 @@ fhir-pipeline/
 │   ├── reference/                              # National geographic and terminology references
 │   ├── truth/                                  # Ground Truth cohort (Étape 3)
 │   └── degraded/                               # Degraded datasets & alteration logs (Étape 4)
+├── docs/reports/
+│   ├── profiling_bronze.md                     # Baseline Quality Report (Markdown)
+│   └── profiling_bronze.json                   # Baseline Quality Report (JSON)
 ├── src/
 │   ├── cli.py                                  # Typer CLI entrypoint
-│   └── ingestion/
+│   └── profiling/
 │       ├── __init__.py                         # Public API exports
-│       ├── schemas.py                          # Pydantic models & PyArrow schemas
-│       ├── readers.py                          # Specialized multi-format source readers
-│       ├── raw.py                              # Raw layer ingestion & SHA-256 integrity
-│       ├── bronze.py                           # Bronze layer conversion & audit columns
-│       ├── quarantine.py                       # Resilient quarantine manager
-│       └── engine.py                           # IngestionEngine & run_ingestion_pipeline
+│       ├── schemas.py                          # Pydantic models & quality schemas
+│       ├── dimensions.py                       # 6 normative dimension evaluators
+│       ├── engine.py                           # QualityProfiler & recall comparison
+│       └── reporter.py                         # Markdown and JSON report generators
 ├── tests/
-│   ├── test_ingestion.py                       # Étape 5 ingestion test suite (Tiers 1-6)
-│   └── test_cli_ingestion.py                   # Étape 5 CLI Typer test suite
+│   ├── test_profiling.py                       # Étape 6 profiling test suite (Tiers 1-5)
+│   └── test_cli_profiling.py                   # Étape 6 CLI Typer test suite
 ├── TEST_INFRA.md                               # This document
 └── TEST_READY.md                               # Test suite readiness & execution summary
 ```
@@ -102,9 +103,9 @@ fhir-pipeline/
 
 ## 5. Execution Commands & Quality Gates
 
-### Running All Étape 5 Tests
+### Running All Étape 6 Tests
 ```bash
-STRICT_E2E=1 uv run pytest tests/test_ingestion.py tests/test_cli_ingestion.py -v
+STRICT_E2E=1 uv run pytest tests/test_profiling.py tests/test_cli_profiling.py -v
 ```
 
 ### Running Full Project Test Suite
@@ -119,7 +120,7 @@ uv run ruff format --check .
 ```
 
 ### Acceptance Gate Criteria
-- **Pass rate**: 100% of executed tests pass (278/278 tests).
+- **Pass rate**: 100% of executed tests pass (335/335 tests).
 - **Ruff linter**: 0 errors, 0 warnings.
 - **Host Docker safety**: 0 host containers stopped or restarted (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`).
-- **Network isolation**: 0 external network requests during test runs.
+- **Detection Recall**: Global recall $\ge 80\%$ on `alterations_log.parquet`.

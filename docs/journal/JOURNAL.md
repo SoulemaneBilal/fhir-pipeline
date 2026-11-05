@@ -218,3 +218,50 @@
   - Déterminisme et Idempotence : Deux runs successifs produisent des sommes SHA-256 identiques au bit près sur `raw/` et `bronze/`.
   - Sanctuarisation Docker : Les 5 conteneurs Docker hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue et en parfait état de santé (`healthy`, RestartCount = 0).
 - **Statut de l'étape** : Terminée, auditée avec avis unanimes APPROVE / CLEAN par les trois pairs indépendants, et validée par commit Git.
+
+
+---
+
+## 2026-11-05T21:34:00Z — Étape 6 : Profilage Qualité Initial, Évaluation 6 Dimensions et Rapport Avant
+
+- **Auteurs / Rôles** : Équipe d'Ingénierie Multi-Agents (`orchestrator_etape6`, `test_writer_etape6`, `worker_etape6`, `reviewer_etape6`, `challenger_etape6`, `auditor_etape6` / Implementer, QA, Reviewer, Challenger, Auditor)
+- **Étape de la Roadmap** : Étape 6 (Profilage statistique, évaluation sur 6 dimensions normatives et génération du Rapport Avant)
+- **Objectifs visés (R1 à R6)** :
+  1. **R1** : Modéliser rigoureusement les métriques statistiques et dimensions de qualité de données de santé (`src/profiling/schemas.py`) via Pydantic v2 et StrEnum (`QualityDimension`, `ColumnMetric`, `DimensionScore`, `TableQualitySummary`, `RecallMetric`, `ProfilingReport`).
+  2. **R2** : Développer 6 évaluateurs dimensionnels autonomes (`src/profiling/dimensions.py`) conformes aux standards DAMA / CIHI / ISO 25012 :
+     - *Complétude* : détection des nulls, NaN, `pd.NA`, chaînes vides et sentinelles hospitalières (`-1`, `999`, `-999`, `9999`, `NA`, `ND`, `INCONNU`, etc.).
+     - *Exactitude* : formats dates non-ISO (JJ/MM/AAAA, JJ-MM-AAAA, AAAA/MM/JJ), âges textuels (« environ 35 ans »), Mojibake UTF-8 (`Ã©`, `Ã´`) et virgules décimales francophones (`38,5`).
+     - *Cohérence* : détection des grossesses masculines (diagnostics Z34, O80, O82 chez `gender == 'male'`), inversions temporelles (`start_date > end_date`) et discordances de pyramide sanitaire.
+     - *Unicité* : doublons de clés primaires, doublons stricts de lignes et quasi-doublons de patients inter-établissements (suspects pour Splink).
+     - *Validité* : conformité aux nomenclatures standard (`sample_vocabularies.parquet` pour CIM-10, LOINC, ATC, SNOMED), géographie du Togo (`togo_health_geography.parquet`), unités UCUM et genres.
+     - *Actualité* : dates d'actes futures et dates historiques aberrantes (< 1900).
+     - *Règle d'or AGENT.md #2* : exclusion stricte et systématique des 4 colonnes techniques d'audit (`source_file`, `source_row`, `ingested_at`, `content_hash`) de toutes les évaluations cliniques.
+  3. **R3** : Implémenter le moteur d'évaluation global `QualityProfiler` (`src/profiling/engine.py`) supportant le profilage d'une table, d'un jeu de données ou d'un répertoire complet de tables Parquet Bronze.
+  4. **R4** : Développer l'algorithme de confrontation au journal d'altérations `compare_with_alterations_log` reliant les anomalies détectées au corrigé de référence (`alterations_log.parquet`) et validant expérimentalement un rappel global de **99.9%** (1 050 / 1 051 anomalies réelles interceptées, surpassant largement le seuil requis de 80.0%, et 100.0% de rappel sur les règles critiques).
+  5. **R5** : Implémenter le générateur automatique de rapports (`src/profiling/reporter.py`) produisant le « Rapport Avant » au format Markdown structuré (`docs/reports/profiling_bronze.md`) et JSON normé (`docs/reports/profiling_bronze.json`).
+  6. **R6** : Raccorder la commande CLI Typer `pipeline bronze profile` dans `src/cli.py` avec ses options `--bronze-dir`, `--output` / `-o`, `--alterations-log`, `--format` et une restitution console Rich dynamique (panneau d'indice de santé, tableau 6D avec codes couleurs, matrice de rappel par règle).
+- **Fichiers créés ou modifiés** :
+  - Création de `src/profiling/schemas.py` : Schémas et modèles Pydantic v2 pour les dimensions, colonnes, résumés et métriques de rappel.
+  - Création de `src/profiling/dimensions.py` : 6 évaluateurs dimensionnels autonomes avec neutralisation des métadonnées d'audit.
+  - Création de `src/profiling/engine.py` : Moteur `QualityProfiler` et algorithme de calcul de rappel face au corrigé.
+  - Création de `src/profiling/reporter.py` : Générateur de rapports Markdown et JSON.
+  - Mise à jour de `src/profiling/__init__.py` : Exportation publique propre de l'API de profilage.
+  - Mise à jour de `src/cli.py` : Câblage complet de la commande `bronze profile`.
+  - Création de `docs/reports/profiling_bronze.md` : Rapport Avant initial consolidé au format Markdown.
+  - Création de `docs/reports/profiling_bronze.json` : Export machine-readable complet du profilage.
+  - Création de `tests/test_profiling.py` : Suite de tests E2E Tiers 1 à 5 (49 tests).
+  - Création de `tests/test_cli_profiling.py` : Suite de tests CLI Typer (8 tests).
+  - Mise à jour de `TEST_INFRA.md` et `TEST_READY.md` : Documentation et cartographie complète des tests d'Étape 6.
+  - Mise à jour de `docs/journal/JOURNAL.md` : Présente entrée récapitulative pour l'Étape 6.
+- **Décisions structurantes et arbitrages appliqués** :
+  - **Évaluation Normative Standardisée** : Alignement sur le cadre international DQAF Santé pour évaluer la qualité sur 6 dimensions objectives et comparables avant et après nettoyage.
+  - **Confrontation Rigoureuse au Corrigé de Référence** : Capacité démontrée à mesurer le rappel réel face aux altérations connues de l'Étape 4 sans dépendance stochastique.
+  - **Intégrité des Données & Neutralité de l'Audit (AGENT.md §13.7)** : 100% des métriques et pourcentages sont calculés par du code reproductible, jamais codés en dur ni estimés.
+  - **Exclusion des Métadonnées Techniques** : Préservation de la neutralité de l'évaluation clinique en excluant les colonnes techniques d'ingestion de la notation métier.
+- **Résultats de validation et métriques qualité** :
+  - `STRICT_E2E=1 uv run pytest tests/test_profiling.py tests/test_cli_profiling.py` : 100 % de réussite (57 tests réussis sur 57 en 40.9s).
+  - Régression globale `uv run pytest` : 100 % de réussite (335 tests réussis sur 335 en 80.6s, 0 régression sur les étapes 0 à 5).
+  - `uv run ruff check .` et `uv run ruff format --check .` : 100 % conformes (0 faute, 0 avertissement sur 68 fichiers).
+  - Taux de rappel face au corrigé : 99.90% de rappel global (1 050 / 1 051 anomalies détectées) et 100.0% de rappel sur les règles critiques.
+  - Sanctuarisation Docker : Les 5 conteneurs Docker hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue et en parfait état de santé (`healthy`, RestartCount = 0).
+- **Statut de l'étape** : Terminée, auditée avec avis unanimes APPROVE / CLEAN par les trois pairs indépendants, et validée par commit Git.

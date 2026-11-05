@@ -1,0 +1,1942 @@
+{
+  "report_id": "rep-20261105-213121",
+  "generated_at": "2026-11-05T21:31:21.857081+00:00",
+  "overall_score": 99.21,
+  "dimensions": {
+    "completeness": 96.67,
+    "accuracy": 99.59,
+    "consistency": 99.88,
+    "uniqueness": 99.97,
+    "validity": 99.17,
+    "timeliness": 99.98
+  },
+  "tables": {
+    "conditions": {
+      "table_name": "conditions",
+      "total_rows": 1302,
+      "columns_count": 14,
+      "dimension_scores": {
+        "completeness": 100.0,
+        "accuracy": 99.55,
+        "consistency": 99.31,
+        "uniqueness": 100.0,
+        "validity": 100.0,
+        "timeliness": 100.0
+      },
+      "global_score": 99.81,
+      "columns": {
+        "condition_id": {
+          "table_name": "conditions",
+          "column_name": "condition_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1302,
+          "duplicate_count": 0,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "patient_id": {
+          "table_name": "conditions",
+          "column_name": "patient_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1000,
+          "duplicate_count": 302,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "encounter_id": {
+          "table_name": "conditions",
+          "column_name": "encounter_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1302,
+          "duplicate_count": 0,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "pathology_group": {
+          "table_name": "conditions",
+          "column_name": "pathology_group",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 9,
+          "duplicate_count": 1293,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "icd10_code": {
+          "table_name": "conditions",
+          "column_name": "icd10_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 12,
+          "duplicate_count": 1290,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "icd10_display": {
+          "table_name": "conditions",
+          "column_name": "icd10_display",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 30,
+          "duplicate_count": 1272,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "snomed_code": {
+          "table_name": "conditions",
+          "column_name": "snomed_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 11,
+          "duplicate_count": 1291,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "snomed_display": {
+          "table_name": "conditions",
+          "column_name": "snomed_display",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 11,
+          "duplicate_count": 1291,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "clinical_status": {
+          "table_name": "conditions",
+          "column_name": "clinical_status",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 1301,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "verification_status": {
+          "table_name": "conditions",
+          "column_name": "verification_status",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 1301,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "severity": {
+          "table_name": "conditions",
+          "column_name": "severity",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 3,
+          "duplicate_count": 1299,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "onset_date": {
+          "table_name": "conditions",
+          "column_name": "onset_date",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 428,
+          "duplicate_count": 874,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "onset_datetime": {
+          "table_name": "conditions",
+          "column_name": "onset_datetime",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1294,
+          "duplicate_count": 8,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "recorded_date": {
+          "table_name": "conditions",
+          "column_name": "recorded_date",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 331,
+          "duplicate_count": 971,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        }
+      },
+      "issues_count": 91
+    },
+    "encounters": {
+      "table_name": "encounters",
+      "total_rows": 1302,
+      "columns_count": 19,
+      "dimension_scores": {
+        "completeness": 95.28,
+        "accuracy": 99.79,
+        "consistency": 100.0,
+        "uniqueness": 100.0,
+        "validity": 100.0,
+        "timeliness": 100.0
+      },
+      "global_score": 99.18,
+      "columns": {
+        "encounter_id": {
+          "table_name": "encounters",
+          "column_name": "encounter_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1302,
+          "duplicate_count": 0,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "patient_id": {
+          "table_name": "encounters",
+          "column_name": "patient_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1000,
+          "duplicate_count": 302,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "facility_id": {
+          "table_name": "encounters",
+          "column_name": "facility_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 183,
+          "duplicate_count": 1119,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "facility_code": {
+          "table_name": "encounters",
+          "column_name": "facility_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 183,
+          "duplicate_count": 1119,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "facility_name": {
+          "table_name": "encounters",
+          "column_name": "facility_name",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 237,
+          "duplicate_count": 1065,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "facility_category": {
+          "table_name": "encounters",
+          "column_name": "facility_category",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 1297,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "pyramid_level": {
+          "table_name": "encounters",
+          "column_name": "pyramid_level",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 4,
+          "duplicate_count": 1298,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "district_code": {
+          "table_name": "encounters",
+          "column_name": "district_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 44,
+          "duplicate_count": 1258,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "region_code": {
+          "table_name": "encounters",
+          "column_name": "region_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 6,
+          "duplicate_count": 1296,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "encounter_class": {
+          "table_name": "encounters",
+          "column_name": "encounter_class",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1300,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "encounter_type": {
+          "table_name": "encounters",
+          "column_name": "encounter_type",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1300,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "start_date": {
+          "table_name": "encounters",
+          "column_name": "start_date",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1295,
+          "duplicate_count": 7,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "start_datetime": {
+          "table_name": "encounters",
+          "column_name": "start_datetime",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1294,
+          "duplicate_count": 8,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "end_date": {
+          "table_name": "encounters",
+          "column_name": "end_date",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1294,
+          "duplicate_count": 8,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "end_datetime": {
+          "table_name": "encounters",
+          "column_name": "end_datetime",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1294,
+          "duplicate_count": 8,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "reason_code": {
+          "table_name": "encounters",
+          "column_name": "reason_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 12,
+          "duplicate_count": 1290,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "reason_display": {
+          "table_name": "encounters",
+          "column_name": "reason_display",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 30,
+          "duplicate_count": 1272,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "status": {
+          "table_name": "encounters",
+          "column_name": "status",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 1301,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "referral_from_facility_id": {
+          "table_name": "encounters",
+          "column_name": "referral_from_facility_id",
+          "total_rows": 1302,
+          "null_count": 1168,
+          "null_ratio": 0.8971,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 10.29,
+          "distinct_count": 81,
+          "duplicate_count": 53,
+          "valid_count": 134,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        }
+      },
+      "issues_count": 1220
+    },
+    "immunizations": {
+      "table_name": "immunizations",
+      "total_rows": 305,
+      "columns_count": 13,
+      "dimension_scores": {
+        "completeness": 99.29,
+        "accuracy": 99.72,
+        "consistency": 100.0,
+        "uniqueness": 100.0,
+        "validity": 100.0,
+        "timeliness": 100.0
+      },
+      "global_score": 99.83,
+      "columns": {
+        "immunization_id": {
+          "table_name": "immunizations",
+          "column_name": "immunization_id",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 305,
+          "duplicate_count": 0,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "patient_id": {
+          "table_name": "immunizations",
+          "column_name": "patient_id",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 61,
+          "duplicate_count": 244,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "encounter_id": {
+          "table_name": "immunizations",
+          "column_name": "encounter_id",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 61,
+          "duplicate_count": 244,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "facility_id": {
+          "table_name": "immunizations",
+          "column_name": "facility_id",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 28,
+          "sentinel_ratio": 0.0918,
+          "completeness_score": 90.82,
+          "distinct_count": 54,
+          "duplicate_count": 251,
+          "valid_count": 277,
+          "invalid_count": 28,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "vaccine_code": {
+          "table_name": "immunizations",
+          "column_name": "vaccine_code",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 300,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "vaccine_display": {
+          "table_name": "immunizations",
+          "column_name": "vaccine_display",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 300,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "vaccine_name": {
+          "table_name": "immunizations",
+          "column_name": "vaccine_name",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 300,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "atc_code": {
+          "table_name": "immunizations",
+          "column_name": "atc_code",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 300,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "dose_number": {
+          "table_name": "immunizations",
+          "column_name": "dose_number",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 304,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "lot_number": {
+          "table_name": "immunizations",
+          "column_name": "lot_number",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 233,
+          "duplicate_count": 72,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "occurrence_date": {
+          "table_name": "immunizations",
+          "column_name": "occurrence_date",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 18,
+          "duplicate_count": 287,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "administered_date": {
+          "table_name": "immunizations",
+          "column_name": "administered_date",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 300,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "status": {
+          "table_name": "immunizations",
+          "column_name": "status",
+          "total_rows": 305,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 304,
+          "valid_count": 305,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        }
+      },
+      "issues_count": 39
+    },
+    "observations": {
+      "table_name": "observations",
+      "total_rows": 1800,
+      "columns_count": 14,
+      "dimension_scores": {
+        "completeness": 86.17,
+        "accuracy": 99.24,
+        "consistency": 100.0,
+        "uniqueness": 100.0,
+        "validity": 95.05,
+        "timeliness": 100.0
+      },
+      "global_score": 96.74,
+      "columns": {
+        "observation_id": {
+          "table_name": "observations",
+          "column_name": "observation_id",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1800,
+          "duplicate_count": 0,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "patient_id": {
+          "table_name": "observations",
+          "column_name": "patient_id",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 965,
+          "duplicate_count": 835,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "encounter_id": {
+          "table_name": "observations",
+          "column_name": "encounter_id",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1175,
+          "duplicate_count": 625,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "category": {
+          "table_name": "observations",
+          "column_name": "category",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 3,
+          "duplicate_count": 1797,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "loinc_code": {
+          "table_name": "observations",
+          "column_name": "loinc_code",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 10,
+          "duplicate_count": 1790,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "loinc_display": {
+          "table_name": "observations",
+          "column_name": "loinc_display",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 10,
+          "duplicate_count": 1790,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "value_quantity": {
+          "table_name": "observations",
+          "column_name": "value_quantity",
+          "total_rows": 1800,
+          "null_count": 570,
+          "null_ratio": 0.3167,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 68.33,
+          "distinct_count": 170,
+          "duplicate_count": 1060,
+          "valid_count": 1230,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "value_numeric": {
+          "table_name": "observations",
+          "column_name": "value_numeric",
+          "total_rows": 1800,
+          "null_count": 570,
+          "null_ratio": 0.3167,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 68.33,
+          "distinct_count": 170,
+          "duplicate_count": 1060,
+          "valid_count": 1230,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "value_unit": {
+          "table_name": "observations",
+          "column_name": "value_unit",
+          "total_rows": 1800,
+          "null_count": 573,
+          "null_ratio": 0.3183,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 68.17,
+          "distinct_count": 16,
+          "duplicate_count": 1211,
+          "valid_count": 1227,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "unit": {
+          "table_name": "observations",
+          "column_name": "unit",
+          "total_rows": 1800,
+          "null_count": 570,
+          "null_ratio": 0.3167,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 68.33,
+          "distinct_count": 6,
+          "duplicate_count": 1224,
+          "valid_count": 1230,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "value_string": {
+          "table_name": "observations",
+          "column_name": "value_string",
+          "total_rows": 1800,
+          "null_count": 1124,
+          "null_ratio": 0.6244,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 37.56,
+          "distinct_count": 58,
+          "duplicate_count": 618,
+          "valid_count": 676,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "interpretation": {
+          "table_name": "observations",
+          "column_name": "interpretation",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 4,
+          "duplicate_count": 1796,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "observation_datetime": {
+          "table_name": "observations",
+          "column_name": "observation_datetime",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1168,
+          "duplicate_count": 632,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "effective_date": {
+          "table_name": "observations",
+          "column_name": "effective_date",
+          "total_rows": 1800,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1168,
+          "duplicate_count": 632,
+          "valid_count": 1800,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        }
+      },
+      "issues_count": 3825
+    },
+    "patients": {
+      "table_name": "patients",
+      "total_rows": 1015,
+      "columns_count": 20,
+      "dimension_scores": {
+        "completeness": 99.83,
+        "accuracy": 99.76,
+        "consistency": 100.0,
+        "uniqueness": 99.8,
+        "validity": 100.0,
+        "timeliness": 99.9
+      },
+      "global_score": 99.88,
+      "columns": {
+        "patient_id": {
+          "table_name": "patients",
+          "column_name": "patient_id",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1015,
+          "duplicate_count": 0,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "identifier_system": {
+          "table_name": "patients",
+          "column_name": "identifier_system",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 1014,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "identifier_value": {
+          "table_name": "patients",
+          "column_name": "identifier_value",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1000,
+          "duplicate_count": 15,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "nni": {
+          "table_name": "patients",
+          "column_name": "nni",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1000,
+          "duplicate_count": 15,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "family_name": {
+          "table_name": "patients",
+          "column_name": "family_name",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 143,
+          "duplicate_count": 872,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "given_name": {
+          "table_name": "patients",
+          "column_name": "given_name",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 86,
+          "duplicate_count": 929,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "gender": {
+          "table_name": "patients",
+          "column_name": "gender",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1013,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "birth_date": {
+          "table_name": "patients",
+          "column_name": "birth_date",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 901,
+          "duplicate_count": 114,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "is_estimated_birth_date": {
+          "table_name": "patients",
+          "column_name": "is_estimated_birth_date",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1013,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "estimated_age_flag": {
+          "table_name": "patients",
+          "column_name": "estimated_age_flag",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1013,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "age_precision": {
+          "table_name": "patients",
+          "column_name": "age_precision",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1013,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "phone_number": {
+          "table_name": "patients",
+          "column_name": "phone_number",
+          "total_rows": 1015,
+          "null_count": 14,
+          "null_ratio": 0.0138,
+          "sentinel_count": 20,
+          "sentinel_ratio": 0.0197,
+          "completeness_score": 96.65,
+          "distinct_count": 973,
+          "duplicate_count": 28,
+          "valid_count": 981,
+          "invalid_count": 20,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "address_region_code": {
+          "table_name": "patients",
+          "column_name": "address_region_code",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 6,
+          "duplicate_count": 1009,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "address_district_code": {
+          "table_name": "patients",
+          "column_name": "address_district_code",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 44,
+          "duplicate_count": 971,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "address_city": {
+          "table_name": "patients",
+          "column_name": "address_city",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 44,
+          "duplicate_count": 971,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "residence_district_code": {
+          "table_name": "patients",
+          "column_name": "residence_district_code",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 44,
+          "duplicate_count": 971,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "residence_region_code": {
+          "table_name": "patients",
+          "column_name": "residence_region_code",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 6,
+          "duplicate_count": 1009,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "marital_status": {
+          "table_name": "patients",
+          "column_name": "marital_status",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 4,
+          "duplicate_count": 1011,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "ethnic_group": {
+          "table_name": "patients",
+          "column_name": "ethnic_group",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 15,
+          "duplicate_count": 1000,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "created_at": {
+          "table_name": "patients",
+          "column_name": "created_at",
+          "total_rows": 1015,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1,
+          "duplicate_count": 1014,
+          "valid_count": 1015,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        }
+      },
+      "issues_count": 85
+    },
+    "prescriptions": {
+      "table_name": "prescriptions",
+      "total_rows": 1302,
+      "columns_count": 13,
+      "dimension_scores": {
+        "completeness": 99.43,
+        "accuracy": 99.5,
+        "consistency": 100.0,
+        "uniqueness": 100.0,
+        "validity": 100.0,
+        "timeliness": 100.0
+      },
+      "global_score": 99.82,
+      "columns": {
+        "prescription_id": {
+          "table_name": "prescriptions",
+          "column_name": "prescription_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1302,
+          "duplicate_count": 0,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "medication_request_id": {
+          "table_name": "prescriptions",
+          "column_name": "medication_request_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1302,
+          "duplicate_count": 0,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "patient_id": {
+          "table_name": "prescriptions",
+          "column_name": "patient_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1000,
+          "duplicate_count": 302,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "encounter_id": {
+          "table_name": "prescriptions",
+          "column_name": "encounter_id",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1302,
+          "duplicate_count": 0,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "atc_code": {
+          "table_name": "prescriptions",
+          "column_name": "atc_code",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 10,
+          "duplicate_count": 1292,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "atc_display": {
+          "table_name": "prescriptions",
+          "column_name": "atc_display",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 10,
+          "duplicate_count": 1292,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "medication_name": {
+          "table_name": "prescriptions",
+          "column_name": "medication_name",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 10,
+          "duplicate_count": 1292,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "dosage_instruction": {
+          "table_name": "prescriptions",
+          "column_name": "dosage_instruction",
+          "total_rows": 1302,
+          "null_count": 96,
+          "null_ratio": 0.0737,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 92.63,
+          "distinct_count": 9,
+          "duplicate_count": 1197,
+          "valid_count": 1206,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "quantity": {
+          "table_name": "prescriptions",
+          "column_name": "quantity",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 7,
+          "duplicate_count": 1295,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "duration_days": {
+          "table_name": "prescriptions",
+          "column_name": "duration_days",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 5,
+          "duplicate_count": 1297,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "prescribed_date": {
+          "table_name": "prescriptions",
+          "column_name": "prescribed_date",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 424,
+          "duplicate_count": 878,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "authored_on": {
+          "table_name": "prescriptions",
+          "column_name": "authored_on",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 1294,
+          "duplicate_count": 8,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        },
+        "status": {
+          "table_name": "prescriptions",
+          "column_name": "status",
+          "total_rows": 1302,
+          "null_count": 0,
+          "null_ratio": 0.0,
+          "sentinel_count": 0,
+          "sentinel_ratio": 0.0,
+          "completeness_score": 100.0,
+          "distinct_count": 2,
+          "duplicate_count": 1300,
+          "valid_count": 1302,
+          "invalid_count": 0,
+          "sample_anomalies": [],
+          "details": {
+            "is_audit": false
+          }
+        }
+      },
+      "issues_count": 181
+    }
+  },
+  "total_rows_analyzed": 7026,
+  "total_issues_detected": 5441,
+  "recall_metrics": [
+    {
+      "rule_id": "RULE-MISS-001",
+      "rule_name": "Valeur manquante (omission de saisie)",
+      "target_table": "patients",
+      "target_column": "phone_number",
+      "total_injected": 110,
+      "detected_count": 110,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Valeur manquante (omission de saisie)"
+    },
+    {
+      "rule_id": "RULE-NAME-003",
+      "rule_name": "Inversion du nom et prénom",
+      "target_table": "patients",
+      "target_column": "family_name",
+      "total_injected": 20,
+      "detected_count": 20,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Inversion du nom et prénom"
+    },
+    {
+      "rule_id": "RULE-DATE-002",
+      "rule_name": "Remplacement de date de naissance par âge approximatif textuel",
+      "target_table": "patients",
+      "target_column": "birth_date",
+      "total_injected": 20,
+      "detected_count": 20,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Remplacement de date de naissance par âge approximatif textuel"
+    },
+    {
+      "rule_id": "RULE-SENT-001",
+      "rule_name": "Injection de code sentinelle d'indétermination",
+      "target_table": "patients",
+      "target_column": "phone_number",
+      "total_injected": 48,
+      "detected_count": 48,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Injection de code sentinelle d'indétermination"
+    },
+    {
+      "rule_id": "RULE-ENCO-001",
+      "rule_name": "Corruption d'encodage Mojibake (UTF-8 lu en Latin-1)",
+      "target_table": "patients",
+      "target_column": "family_name",
+      "total_injected": 13,
+      "detected_count": 13,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Corruption d'encodage Mojibake (UTF-8 lu en Latin-1)"
+    },
+    {
+      "rule_id": "RULE-DATE-001",
+      "rule_name": "Format de date altéré en notation composite",
+      "target_table": "patients",
+      "target_column": "birth_date",
+      "total_injected": 297,
+      "detected_count": 297,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Format de date altéré en notation composite"
+    },
+    {
+      "rule_id": "RULE-NAME-002",
+      "rule_name": "Suppression des accents et diacritiques",
+      "target_table": "patients",
+      "target_column": "family_name",
+      "total_injected": 10,
+      "detected_count": 10,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Suppression des accents et diacritiques"
+    },
+    {
+      "rule_id": "RULE-NAME-001",
+      "rule_name": "Coquille patronymique réaliste",
+      "target_table": "patients",
+      "target_column": "family_name",
+      "total_injected": 22,
+      "detected_count": 22,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Coquille patronymique réaliste"
+    },
+    {
+      "rule_id": "RULE-DUPL-001",
+      "rule_name": "Doublon patient inter-établissements injecté pour Splink depuis 85bbd55a-8516-5f40-ad11-c2243bc1ba3a",
+      "target_table": "patients",
+      "target_column": "patient_id",
+      "total_injected": 15,
+      "detected_count": 15,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Doublon patient inter-établissements injecté pour Splink depuis 85bbd55a-8516-5f40-ad11-c2243bc1ba3a"
+    },
+    {
+      "rule_id": "RULE-CLIN-001",
+      "rule_name": "Diagnostic formalisé remplacé par libellé en texte libre",
+      "target_table": "encounters",
+      "target_column": "reason_display",
+      "total_injected": 166,
+      "detected_count": 166,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Diagnostic formalisé remplacé par libellé en texte libre"
+    },
+    {
+      "rule_id": "RULE-FACI-001",
+      "rule_name": "Variante informelle de nom de structure sanitaire",
+      "target_table": "encounters",
+      "target_column": "facility_name",
+      "total_injected": 60,
+      "detected_count": 59,
+      "recall": 0.9833,
+      "precision": 0.96,
+      "description": "Variante informelle de nom de structure sanitaire"
+    },
+    {
+      "rule_id": "RULE-MEAS-001",
+      "rule_name": "Séparateur décimal virgule francophone",
+      "target_table": "observations",
+      "target_column": "value_string",
+      "total_injected": 148,
+      "detected_count": 148,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Séparateur décimal virgule francophone"
+    },
+    {
+      "rule_id": "RULE-MEAS-002",
+      "rule_name": "Unité de mesure non conforme ou omise",
+      "target_table": "observations",
+      "target_column": "value_unit",
+      "total_injected": 122,
+      "detected_count": 122,
+      "recall": 1.0,
+      "precision": 0.96,
+      "description": "Unité de mesure non conforme ou omise"
+    }
+  ],
+  "summary_notes": [
+    "Profilage initial de 6 tables (7026 enregistrements analysés).",
+    "Score de santé global : 99.2% sur 6 dimensions normatives."
+  ]
+}

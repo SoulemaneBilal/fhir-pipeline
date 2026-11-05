@@ -35,6 +35,12 @@ from src.ingestion import (
     validate_bronze_directory,
     verify_raw_integrity,
 )
+from src.profiling import (
+    QualityDimension,
+    QualityProfiler,
+    generate_json_report,
+    generate_markdown_report,
+)
 from src.terminology.geography import (
     DEFAULT_GEOGRAPHY_PARQUET_PATH,
     generate_health_geography,
@@ -309,20 +315,150 @@ def bronze_validate(
     help="Exécuter le profilage qualité initial (Étape 6) sur 6 dimensions normatives (Rapport Avant).",
 )
 def bronze_profile(
-    output_report: Annotated[
+    bronze_dir: Annotated[
+        Path,
+        typer.Option(
+            "--bronze-dir",
+            help="Répertoire source des tables Parquet Bronze.",
+        ),
+    ] = Path("data/bronze"),
+    output: Annotated[
         Path,
         typer.Option(
             "--output",
             "-o",
-            help="Chemin du rapport de qualité produit.",
+            help="Chemin de destination du rapport produit.",
         ),
     ] = Path("docs/reports/profiling_bronze.md"),
+    alterations_log: Annotated[
+        Path | None,
+        typer.Option(
+            "--alterations-log",
+            help="Chemin optionnel du journal d'altérations pour le calcul du rappel face au corrigé.",
+        ),
+    ] = Path("data/degraded/alterations_log.parquet"),
+    format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            help="Format de restitution du rapport : markdown, json, both.",
+        ),
+    ] = "markdown",
 ) -> None:
-    """Profile la qualité de la couche Bronze."""
+    """Profile la qualité de la couche Bronze selon les 6 dimensions normatives."""
+    fmt = format.lower().strip()
+    if fmt not in ("markdown", "json", "both"):
+        console.print(
+            f"[bold red]Format invalide : '{format}'. Les formats autorisés sont 'markdown', 'json' ou 'both'.[/bold red]"
+        )
+        raise typer.Exit(code=1)
+
+    if not bronze_dir.exists():
+        console.print(
+            f"[bold red]Erreur : Le répertoire source Bronze '{bronze_dir}' est introuvable ou inexistant.[/bold red]"
+        )
+        raise typer.Exit(code=1)
+
+    # Si le répertoire bronze par défaut est vide, basculer sur data/degraded si disponible
+    if bronze_dir == Path("data/bronze") and not list(bronze_dir.glob("*.parquet")):
+        degraded_dir = Path("data/degraded")
+        if degraded_dir.exists() and list(degraded_dir.glob("*.parquet")):
+            console.print(
+                f"[yellow][BRONZE][/yellow] Répertoire '{bronze_dir}' sans tables Parquet. "
+                f"Bascule automatique sur les tables de référence : [cyan]{degraded_dir}[/cyan]"
+            )
+            bronze_dir = degraded_dir
+
     console.print(
-        f"[bold blue][BRONZE][/bold blue] Profilage qualité 6 dimensions. "
-        f"Rapport cible : [cyan]{output_report}[/cyan]."
+        f"[bold blue][BRONZE][/bold blue] Profilage qualité initial 6 dimensions sur [cyan]{bronze_dir}[/cyan]..."
     )
+
+    profiler = QualityProfiler()
+    report = profiler.profile_directory(
+        bronze_dir=bronze_dir,
+        alterations_log_path=alterations_log
+        if (alterations_log and alterations_log.exists())
+        else None,
+    )
+
+    # Affichage Rich : Jauge et Score Global
+    status_color = (
+        "green"
+        if report.overall_score >= 80.0
+        else ("yellow" if report.overall_score >= 60.0 else "red")
+    )
+    console.print(
+        Panel(
+            f"[bold]Score Global de Santé Qualité :[/bold] [{status_color} bold]{report.overall_score:.1f}%[/{status_color} bold]\n"
+            f"[dim]Tables analysées : {len(report.tables)} | Lignes : {report.total_rows_analyzed:,} | Anomalies : {report.total_issues_detected:,}[/dim]",
+            title="[bold blue][BRONZE] Diagnostic Qualité Initial[/bold blue]",
+            expand=False,
+        )
+    )
+
+    # Affichage Rich : Tableau des 6 dimensions
+    dim_table = Table(title="Synthèse des 6 Dimensions Normatives de Qualité")
+    dim_table.add_column("Dimension", style="cyan")
+    dim_table.add_column("Score", style="bold")
+    dim_table.add_column("Statut", style="bold")
+
+    for dim in QualityDimension:
+        sc = report.dimensions.get(dim, report.dimensions.get(dim.value, 0.0))
+        sc_color = "green" if sc >= 85.0 else ("yellow" if sc >= 70.0 else "red")
+        st_text = (
+            "EXCELLENT"
+            if sc >= 95.0
+            else ("BON" if sc >= 85.0 else ("MOYEN" if sc >= 70.0 else "CRITIQUE"))
+        )
+        dim_table.add_row(
+            dim.name, f"[{sc_color}]{sc:.1f}%[/{sc_color}]", f"[{sc_color}]{st_text}[/{sc_color}]"
+        )
+
+    console.print(dim_table)
+
+    # Affichage Rich : Matrice de rappel si disponible
+    if report.recall_metrics:
+        recall_table = Table(title="Confrontation au Journal d'Altérations (Taux de Rappel)")
+        recall_table.add_column("Règle", style="cyan")
+        recall_table.add_column("Table", style="dim")
+        recall_table.add_column("Injectées", justify="right")
+        recall_table.add_column("Détectées", justify="right")
+        recall_table.add_column("Rappel", style="bold")
+
+        tot_inj = sum(m.total_injected for m in report.recall_metrics)
+        tot_det = sum(m.detected_count for m in report.recall_metrics)
+        ov_recall = (tot_det / max(1, tot_inj)) * 100.0
+
+        for m in report.recall_metrics:
+            r_pct = m.recall * 100.0 if m.recall <= 1.0 else m.recall
+            r_col = "green" if r_pct >= 80.0 else ("yellow" if r_pct >= 60.0 else "red")
+            recall_table.add_row(
+                m.rule_id,
+                m.target_table,
+                str(m.total_injected),
+                str(m.detected_count),
+                f"[{r_col}]{r_pct:.1f}%[/{r_col}]",
+            )
+        console.print(recall_table)
+        ov_col = "green" if ov_recall >= 80.0 else "red"
+        console.print(
+            f"[bold]Rappel global face au corrigé :[/bold] [{ov_col} bold]{ov_recall:.1f}%[/{ov_col} bold] ({tot_det}/{tot_inj})"
+        )
+
+    # Génération des fichiers selon format
+    generated_files: list[Path] = []
+    if fmt in ("markdown", "both"):
+        md_path = output if output.suffix.lower() == ".md" else output.with_suffix(".md")
+        generate_markdown_report(report, md_path)
+        generated_files.append(md_path)
+
+    if fmt in ("json", "both"):
+        json_path = output if output.suffix.lower() == ".json" else output.with_suffix(".json")
+        generate_json_report(report, json_path)
+        generated_files.append(json_path)
+
+    for gf in generated_files:
+        console.print(f"[bold green]✓ Rapport généré avec succès :[/bold green] [cyan]{gf}[/cyan]")
 
 
 # ==============================================================================
