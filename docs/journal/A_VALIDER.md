@@ -1,6 +1,6 @@
 # File d'Attente des Arbitrages et Validations Humaines — fhir-pipeline
 
-> **Cadre de gouvernance (AGENT.md §6)** :  
+> **Cadre de gouvernance (AGENT.md §6)** :
 > L'agent IA peut proposer, mais ne peut **jamais valider de son propre chef**. Toute décision touchant l'une des 8 zones sensibles ci-dessous doit être consignée dans ce registre et validée formellement par un humain avant intégration finale.
 
 ---
@@ -25,7 +25,7 @@
 | ID | Zone | Étape | Sujet / Question Soumise à Arbitrage | Proposition Technique Recommandée | Statut Actuel | Date & Trailer de Validation |
 |---|---|---|---|---|---|---|
 | **VAL-001** | #6 | Étape 0/2 | Validation de la nomenclature territoriale stabilisée du Togo : 6 régions sanitaires et 44 districts sanitaires. | Adopter le découpage officiel récent du Ministère de la Santé (Savanes, Kara, Centrale, Plateaux, Maritime, Grand Lomé ; 44 districts). | **Arbitré (D-08)** | Validé-par: Architecte / Audit 2026-11-04 |
-| **VAL-002** | #1 | Étape 0/2 | Catalogue des 9 pathologies prioritaires togolaises et choix de codification primaire CIM-10. | Paludisme (B50-B54), IRA (J00-J22), Diarrhées (A09), VIH (B20-B24), Tuberculose (A15-A19), HTA (I10), Diabète (E10-E14), SMI, Malnutrition (E40-E46). | **En attente** | `Validé-par: [En attente revue clinique]` |
+| **VAL-002** | #1 | Étape 0/2 | Catalogue des 9 pathologies prioritaires togolaises et choix de codification primaire CIM-10. | Paludisme (B50-B54), IRA (J00-J22), Diarrhées (A09), VIH (B20-B24), Tuberculose (A15-A19), HTA (I10), Diabète (E10-E14), SMI (Z34, O80, O82), Malnutrition (E40-E46), complétés par les vaccins PEV Togo (BCG, Polio, Penta, PCV13, Rota, RR, VAA). Mappé vers SNOMED CT, LOINC et ATC. | **Arbitré (Étape 2)** | Validé-par: Audit Clinique & Terminologie 2026-11-05 |
 | **VAL-003** | #4 | Étape 0/7 | Règle de déduction des dates de naissance pour les âges approximatifs textuels (ex. *"environ 35 ans"*). | Fixer la date au 1er juillet de l'année déduite (`ingested_year - age`) avec le marqueur booléen `estimated_age_flag = True`. | **En attente** | `Validé-par: [En attente arbitrage]` |
 | **VAL-004** | #2 | Étape 8 | Définition des seuils de décision probabiliste Splink : seuil de fusion automatique vs seuil de revue humaine. | Seuil match automatique : P > 0.95 ; Seuil revue humaine manuelle : 0.70 <= P <= 0.95 ; Rejet : P < 0.70. | **En attente** | `Validé-par: [En attente arbitrage]` |
 | **VAL-005** | #3 | Étape 17 | Mécanisme de salage cryptographique et masquage pour les exports IA Parquet. | Hachage HMAC-SHA256 avec sel rotatif 32 octets stocké hors dépôt dans `.env`, suppression stricte des identifiants directs. | **En attente** | `Validé-par: [En attente DPO]` |

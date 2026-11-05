@@ -114,6 +114,8 @@ coverage.xml
 !/data/reference/.gitkeep
 # Exception : autoriser d'éventuels micro-échantillons de référence (< 1 Mo)
 !/data/reference/sample_*
+!/data/reference/togo_health_geography.parquet
+
 
 # ------------------------------------------------------------------------------
 # 7. Mémoire de coordination multi-agents

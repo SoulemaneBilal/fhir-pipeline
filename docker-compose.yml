@@ -1,0 +1,150 @@
+name: fhir-pipeline
+
+networks:
+  fhir-network:
+    name: fhir-pipeline_net
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: fhir-pipeline_postgres_data
+  mongodb_data:
+    name: fhir-pipeline_mongodb_data
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Base relationnelle PostgreSQL 15 (Double base : hapi_fhir & omop_cdm)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: fhir-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pipeline_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pipeline_secure_password_dev}
+      POSTGRES_DB: ${HAPI_FHIR_DB:-hapi_fhir}
+      POSTGRES_MULTIPLE_DATABASES: ${HAPI_FHIR_DB:-hapi_fhir},${OMOP_DB:-omop_cdm}
+      OMOP_DB: ${OMOP_DB:-omop_cdm}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-multi-db.sh:/docker-entrypoint-initdb.d/01-init-multi-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-pipeline_admin} -d $${POSTGRES_DB:-hapi_fhir}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - fhir-network
+
+  # ----------------------------------------------------------------------------
+  # 2. Entrepôt opérationnel FHIR R4 (HAPI FHIR JPA Server)
+  # ----------------------------------------------------------------------------
+  hapi-fhir:
+    image: hapiproject/hapi:v6.8.0
+    container_name: fhir-hapi
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${HAPI_FHIR_DB:-hapi_fhir}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-pipeline_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-pipeline_secure_password_dev}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_HBM2DDL_AUTO: update
+      hapi.fhir.fhir_version: R4
+      hapi.fhir.server_address: ${HAPI_FHIR_BASE_URL:-http://localhost:8080/fhir}
+      JAVA_TOOL_OPTIONS: -Xmx2g
+    ports:
+      - "${HAPI_FHIR_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app", "HealthCheck"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    networks:
+      - fhir-network
+
+  # ----------------------------------------------------------------------------
+  # 3. Base documentaire MongoDB (Stockage passerelle OpenHIM)
+  # ----------------------------------------------------------------------------
+  mongodb:
+    image: mongo:6.0
+    container_name: fhir-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGODB_DB:-openhim}
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand(\"ping\").ok' | grep -q 1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - fhir-network
+
+  # ----------------------------------------------------------------------------
+  # 4. Passerelle d'interopérabilité OpenHIE (OpenHIM Core)
+  # ----------------------------------------------------------------------------
+  openhim-core:
+    image: jembi/openhim-core:latest
+    container_name: fhir-openhim-core
+    restart: unless-stopped
+    environment:
+      mongo_url: mongodb://mongodb:27017/${MONGODB_DB:-openhim}
+      mongo_atnaUrl: mongodb://mongodb:27017/${MONGODB_DB:-openhim}
+      NODE_ENV: development
+      api_authenticationTypes: '["token","basic","openid","local"]'
+      authentication_enableCustomTokenAuthentication: "true"
+      api_httpsPort: 8080
+      router_httpsPort: 5000
+      router_httpPort: 5001
+    ports:
+      - "${OPENHIM_API_PORT:-5001}:8080"
+      - "${OPENHIM_ROUTER_HTTPS_PORT:-5000}:5000"
+      - "${OPENHIM_ROUTER_HTTP_PORT:-5050}:5001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      hapi-fhir:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -s -f https://localhost:8080/heartbeat || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - fhir-network
+
+  # ----------------------------------------------------------------------------
+  # 5. Console d'administration Web OpenHIE (OpenHIM Console)
+  # ----------------------------------------------------------------------------
+  openhim-console:
+    image: jembi/openhim-console:latest
+    container_name: fhir-openhim-console
+    restart: unless-stopped
+    ports:
+      - "${OPENHIM_CONSOLE_PORT:-9000}:80"
+    volumes:
+      - ./docker/openhim/default.json:/usr/share/nginx/html/config/default.json:ro
+    depends_on:
+      openhim-core:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || wget -q --spider http://localhost:80/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - fhir-network

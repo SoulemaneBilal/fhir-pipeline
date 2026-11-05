@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def project_root() -> Path:
     """Renvoie le chemin racine absolu du projet."""
     return Path(__file__).resolve().parent.parent

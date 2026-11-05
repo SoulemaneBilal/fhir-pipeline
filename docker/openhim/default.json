@@ -1,0 +1,6 @@
+{
+  "protocol": "https",
+  "host": "localhost",
+  "port": 5001,
+  "api-docs": "https://github.com/jembi/openhim-core-js/blob/master/docs/api.md"
+}
