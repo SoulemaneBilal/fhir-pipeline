@@ -176,3 +176,45 @@
   - Adhérence stricte aux taux cibles : Mesures empiriques à 5.00%, 15.00% et 30.00% avec un écart exact de 0.00% sur les patients altérés (largement dans la tolérance de +/- 5%).
   - Sanctuarisation Docker : Les 5 conteneurs Docker hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue et en parfait état de santé (`healthy`).
 - **Statut de l'étape** : Terminée, auditée avec avis unanimes APPROVE / CLEAN par les trois pairs indépendants, et validée par commit Git.
+
+
+---
+
+## 2026-11-05T20:44:00Z — Étape 5 : Ingestion Multi-Formats (Raw, Bronze et Quarantaine)
+
+- **Auteurs / Rôles** : Équipe d'Ingénierie Multi-Agents (`orchestrator_etape5`, `test_writer_etape5`, `worker_etape5`, `reviewer_etape5`, `challenger_etape5`, `auditor_etape5` / Implementer, QA, Reviewer, Challenger, Auditor)
+- **Étape de la Roadmap** : Étape 5 (Ingestion raw et bronze, gestion de quarantaine et traçabilité)
+- **Objectifs visés (R1 à R7)** :
+  1. **R1** : Développer des lecteurs spécialisés multiformats résilients (`src/ingestion/readers.py`) couvrant les classeurs Excel multi-onglets (`.xlsx`, `.xls` via `openpyxl`/`xlrd`), les fichiers CSV avec autodétection robuste du délimiteur (`,`, `;`, `\t`, `|`) et de l'encodage (`utf-8`, `utf-8-sig`, `latin-1`, `cp1252`) sans altération des diacritiques français togolais, les Bundles FHIR R4 JSON dégradés (`type: collection` ou ressources unitaires), les exports DHIS2 `dataValueSets` (JSON/Parquet), et un renifleur automatique de format (`detect_source_type`).
+  2. **R2** : Implémenter la couche Raw (`src/ingestion/raw.py`) garantissant la sanctuarisation bit-à-bit des sources (lecture seule, principe inviolable #1 de `AGENT.md`), le calcul d'empreinte SHA-256 par bloc de 64 Ko, la persistance du manifeste d'audit `raw_manifest.json`, l'idempotence des copies et l'audit d'intégrité byte-level (`verify_raw_integrity`).
+  3. **R3** : Structurer la couche Bronze (`src/ingestion/bronze.py`) au format Apache Parquet SNAPPY avec injection systématique et obligatoire des 4 colonnes techniques d'audit (principe #2 de `AGENT.md`) : `source_file` (chemin relatif), `source_row` (indice 1-based), `ingested_at` (ISO 8601 UTC) et `content_hash` (SHA-256 hex 64 car. calculé sur le contenu dénormalisé de chaque ligne).
+  4. **R4** : Déployer un mécanisme de quarantaine résilient (`src/ingestion/quarantine.py`) isolant automatiquement les fichiers physiquement corrompus (binaires tronqués, JSON malformés) dans `data/quarantine/` avec fiches d'incidents codifiées (`<source>.quarantine.json`, `QuarantineRecord`). Respect absolu de la **Règle d'or de non-blocage** : un incident sur un fichier corrompu n'interrompt JAMAIS le traitement du lot (principe #6 de `AGENT.md`), les fichiers valides étant convertis en Bronze à 100%.
+  5. **R5** : Implémenter le moteur d'ingestion global unifié (`src/ingestion/engine.py`, `src/ingestion/__init__.py`) avec classe `IngestionEngine` et fonction `run_ingestion_pipeline`, supportant un mode simulation `--dry-run` sans effets de bord sur disque et un reporting récapitulatif complet (`IngestionResult`).
+  6. **R6** : Garantir les invariants d'ingestion : égalité stricte des comptes de lignes (`len(bronze) == len(sources_valides)`), déterminisme binaire bit-à-bit et idempotence des conversions.
+  7. **R7** : Câbler les commandes CLI Typer sous les groupes `raw` et `bronze` dans `src/cli.py` (`pipeline raw ingest`, `pipeline raw status`, `pipeline bronze convert`, `pipeline bronze validate`) avec validation stricte des options, aides en français et restitution graphique soignée via Rich.
+- **Fichiers créés ou modifiés** :
+  - Création de `src/ingestion/schemas.py` : Modèles Pydantic v2 et schémas PyArrow stricts (`SourceFormat`, `RawFileRecord`, `RawManifest`, `QuarantineRecord`, `AUDIT_COLUMNS`, `BRONZE_AUDIT_SCHEMA`, `IngestionResult`).
+  - Création de `src/ingestion/readers.py` : Lecteurs spécialisés multi-formats (Excel, CSV autodétecté, FHIR JSON, DHIS2, sniffer de format).
+  - Création de `src/ingestion/raw.py` : Copie immuable, hachage SHA-256, manifeste `raw_manifest.json` et vérificateur d'intégrité.
+  - Création de `src/ingestion/bronze.py` : Calcul de hachage de ligne, injection des 4 colonnes techniques et conversion Parquet typée.
+  - Création de `src/ingestion/quarantine.py` : Gestionnaire de quarantaine non-bloquant et fiches d'incidents.
+  - Création de `src/ingestion/engine.py` : Moteur d'orchestration unifié `IngestionEngine`.
+  - Mise à jour de `src/ingestion/__init__.py` : Exportation publique propre de l'API d'ingestion.
+  - Mise à jour de `src/cli.py` : Câblage complet des commandes `raw ingest`, `raw status`, `bronze convert` et `bronze validate`.
+  - Création de `tests/test_ingestion.py` : Suite de tests E2E Tiers 1 à 6 (32 tests).
+  - Création de `tests/test_cli_ingestion.py` : Suite de tests CLI Typer (12 tests).
+  - Mise à jour de `TEST_INFRA.md` et `TEST_READY.md` : Documentation et cartographie complète des tests d'Étape 5.
+  - Mise à jour de `docs/journal/JOURNAL.md` : Présente entrée récapitulative pour l'Étape 5.
+- **Décisions structurantes et arbitrages appliqués** :
+  - **Architecture Medallion (Raw -> Bronze)** : Séparation étanche entre les données sources brutes immuables en lecture seule dans `data/raw/` et les tables structurées Parquet enrichies des métadonnées de traçabilité dans `data/bronze/`.
+  - **Traçabilité inviolable (Principes #1 et #2 de AGENT.md)** : 100% des lignes de la couche Bronze conservent `source_file`, `source_row` (1-based), `ingested_at` et `content_hash`, permettant un traçage univoque jusqu'au fichier physique source.
+  - **Résilience absolue (Règle d'or de Quarantaine)** : Validation empirique adverse confirmant que la présence de fichiers corrompus au sein d'un lot n'interrompt pas le flux et n'altère pas l'ingestion des autres tables valides.
+  - **Autonomie réseau & Autodétection d'encodage** : Analyse stochastique séquentielle multi-encodages pure Python sans dépendance tierce lourde, préservant l'intégrité des patronymes togolais (Éwé, Mina, Kabiyè) et des libellés cliniques.
+- **Résultats de validation et métriques qualité** :
+  - `STRICT_E2E=1 uv run pytest tests/test_ingestion.py tests/test_cli_ingestion.py` : 100 % de réussite (44 tests réussis sur 44 en 1.60s).
+  - Régression globale `uv run pytest` : 100 % de réussite (278 tests réussis sur 278 en 19.2s, 0 régression).
+  - `uv run ruff check .` et `uv run ruff format --check .` : 100 % conformes (0 faute, 0 avertissement sur 61 fichiers).
+  - Égalité stricte des comptes : 100.0% de concordance vérifiée expérimentalement par `challenger_etape5` sur les 4 formats (Excel 16/16, CSV 8/8, FHIR 9/9, DHIS2 12/12).
+  - Déterminisme et Idempotence : Deux runs successifs produisent des sommes SHA-256 identiques au bit près sur `raw/` et `bronze/`.
+  - Sanctuarisation Docker : Les 5 conteneurs Docker hôtes préexistants (`backend`, `backend-db`, `fhir`, `icd-api`, `frontend`) sont restés en exécution ininterrompue et en parfait état de santé (`healthy`, RestartCount = 0).
+- **Statut de l'étape** : Terminée, auditée avec avis unanimes APPROVE / CLEAN par les trois pairs indépendants, et validée par commit Git.

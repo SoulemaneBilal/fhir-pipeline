@@ -27,6 +27,14 @@ from src.generation import (
     extract_or_generate_dhis2_aggregates,
     generate_ground_truth,
 )
+from src.ingestion import (
+    calculate_file_sha256,
+    convert_to_bronze,
+    ingest_raw_batch,
+    ingest_raw_file,
+    validate_bronze_directory,
+    verify_raw_integrity,
+)
 from src.terminology.geography import (
     DEFAULT_GEOGRAPHY_PARQUET_PATH,
     generate_health_geography,
@@ -74,9 +82,17 @@ def raw_ingest(
         typer.Option(
             "--source",
             "-s",
-            help="Type ou identifiant de source (excel, csv, dhis2, fhir, all).",
+            help="Type ou identifiant de source (excel, csv, dhis2, fhir, all) ou chemin de fichier.",
         ),
     ] = "all",
+    dest: Annotated[
+        Path,
+        typer.Option(
+            "--dest",
+            "-d",
+            help="Répertoire de destination des données brutes.",
+        ),
+    ] = Path("data/raw"),
     dry_run: Annotated[
         bool,
         typer.Option(
@@ -90,6 +106,39 @@ def raw_ingest(
         f"[bold blue][RAW][/bold blue] Ingestion des sources : [cyan]{source}[/cyan] "
         f"(dry-run={dry_run}). Empreintes SHA-256 calculées."
     )
+    src_path = Path(source)
+    if source != "all" and not src_path.exists():
+        console.print(
+            f"[bold red]Erreur :[/bold red] Fichier ou répertoire source introuvable : {source}"
+        )
+        raise typer.Exit(code=1)
+
+    if src_path.exists() and src_path.is_file():
+        rec = ingest_raw_file(src_path, dest, dry_run=dry_run)
+        table = Table(title="Fichier brut ingéré")
+        table.add_column("Fichier source", style="cyan")
+        table.add_column("Destination Raw", style="magenta")
+        table.add_column("Taille (octets)", justify="right")
+        table.add_column("Empreinte SHA-256", style="green")
+        table.add_row(rec.source_path, rec.raw_path, str(rec.file_size_bytes), rec.file_hash)
+        console.print(table)
+    elif src_path.exists() and src_path.is_dir():
+        files = [
+            p
+            for p in sorted(src_path.iterdir())
+            if p.is_file() and p.name != "raw_manifest.json" and not p.name.startswith(".")
+        ]
+        if not files:
+            console.print(f"[yellow]Aucun fichier à ingérer dans {src_path}.[/yellow]")
+        else:
+            manifest = ingest_raw_batch(files, dest, dry_run=dry_run)
+            table = Table(title=f"Lot brut ingéré ({len(manifest.files)} fichiers)")
+            table.add_column("Fichier source", style="cyan")
+            table.add_column("Taille (octets)", justify="right")
+            table.add_column("Empreinte SHA-256", style="green")
+            for rec in manifest.files:
+                table.add_row(Path(rec.source_path).name, str(rec.file_size_bytes), rec.file_hash)
+            console.print(table)
 
 
 @raw_app.command(
@@ -97,6 +146,13 @@ def raw_ingest(
     help="Afficher l'état d'intégrité et la liste des fichiers sources bruts dans data/raw/.",
 )
 def raw_status(
+    raw_dir: Annotated[
+        Path,
+        typer.Option(
+            "--raw-dir",
+            help="Répertoire des données sources brutes.",
+        ),
+    ] = Path("data/raw"),
     verify_hash: Annotated[
         bool,
         typer.Option(
@@ -110,6 +166,34 @@ def raw_status(
         f"[bold blue][RAW][/bold blue] Inspection du répertoire data/raw/ "
         f"(vérification d'empreinte={verify_hash})."
     )
+    if not raw_dir.exists():
+        console.print(f"[yellow]Le répertoire {raw_dir} n'existe pas encore.[/yellow]")
+        return
+
+    table = Table(title=f"Statut Couche Brute ({raw_dir})")
+    table.add_column("Fichier", style="cyan")
+    table.add_column("Taille", justify="right")
+    table.add_column("Empreinte SHA-256", style="green")
+    if verify_hash:
+        table.add_column("Intégrité", style="bold")
+
+    files = [p for p in sorted(raw_dir.glob("*")) if p.is_file() and p.name != ".gitkeep"]
+    if not files:
+        console.print("[yellow]Aucun fichier présent dans data/raw/.[/yellow]")
+        return
+
+    is_valid_manifest, corrupted = verify_raw_integrity(raw_dir) if verify_hash else (True, [])
+
+    for f in files:
+        size_str = f"{f.stat().st_size} o"
+        sha = calculate_file_sha256(f)
+        if verify_hash:
+            status_str = "[red]ALTÉRÉ[/red]" if str(f) in corrupted else "[green]CONFORME[/green]"
+            table.add_row(f.name, size_str, sha, status_str)
+        else:
+            table.add_row(f.name, size_str, sha)
+
+    console.print(table)
 
 
 # ==============================================================================
@@ -128,6 +212,20 @@ app.add_typer(bronze_app, name="bronze")
     help="Convertir les données sources brutes en tables Parquet typées avec 4 métadonnées d'audit.",
 )
 def bronze_convert(
+    raw_dir: Annotated[
+        Path,
+        typer.Option(
+            "--raw-dir",
+            help="Répertoire source des fichiers bruts.",
+        ),
+    ] = Path("data/raw"),
+    output_dir: Annotated[
+        Path,
+        typer.Option(
+            "--output-dir",
+            help="Répertoire cible de destination des tables Bronze Parquet.",
+        ),
+    ] = Path("data/bronze"),
     batch_id: Annotated[
         str | None,
         typer.Option(
@@ -142,6 +240,20 @@ def bronze_convert(
         f"[bold blue][BRONZE][/bold blue] Conversion vers Parquet (lot: [cyan]{bid}[/cyan]). "
         "Attributs source_file, source_row, ingested_at, content_hash injectés."
     )
+    if not raw_dir.exists():
+        console.print(f"[yellow]Le répertoire {raw_dir} n'existe pas.[/yellow]")
+        return
+
+    tables = convert_to_bronze(raw_dir, output_dir, batch_id=bid)
+    if tables:
+        t = Table(title="Tables Parquet Bronze générées")
+        t.add_column("Table", style="cyan")
+        t.add_column("Fichier Parquet", style="green")
+        for name, p in tables.items():
+            t.add_row(name, str(p))
+        console.print(t)
+    else:
+        console.print(f"[yellow]Aucune table Parquet générée depuis {raw_dir}.[/yellow]")
 
 
 @bronze_app.command(
@@ -149,6 +261,13 @@ def bronze_convert(
     help="Valider les schémas et l'intégrité technique des tables Parquet Bronze.",
 )
 def bronze_validate(
+    bronze_dir: Annotated[
+        Path,
+        typer.Option(
+            "--bronze-dir",
+            help="Répertoire des tables Parquet Bronze à valider.",
+        ),
+    ] = Path("data/bronze"),
     strict: Annotated[
         bool,
         typer.Option(
@@ -161,6 +280,28 @@ def bronze_validate(
     console.print(
         f"[bold blue][BRONZE][/bold blue] Validation des tables Parquet (strict={strict})."
     )
+    if not bronze_dir.exists():
+        console.print(f"[yellow]Le répertoire {bronze_dir} n'existe pas.[/yellow]")
+        if strict:
+            raise typer.Exit(code=1)
+        return
+
+    results = validate_bronze_directory(bronze_dir, strict=strict)
+    t = Table(title=f"Diagnostic des tables Bronze ({bronze_dir})")
+    t.add_column("Table", style="cyan")
+    t.add_column("Validation", style="bold")
+
+    has_failure = False
+    for name, is_valid in results.items():
+        if is_valid:
+            t.add_row(name, "[green]CONFORME[/green]")
+        else:
+            t.add_row(name, "[red]NON CONFORME[/red]")
+            has_failure = True
+
+    console.print(t)
+    if strict and has_failure:
+        raise typer.Exit(code=1)
 
 
 @bronze_app.command(
